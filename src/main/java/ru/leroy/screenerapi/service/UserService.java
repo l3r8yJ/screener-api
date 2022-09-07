@@ -24,17 +24,21 @@ public class UserService {
     }
 
     public UserEntity authentication(final String email, final String password) {
-        AtomicReference<UserEntity> ref = new AtomicReference<>();
+        AtomicReference<UserEntity> atomicUser = new AtomicReference<>();
         this.repository
             .findByEmail(email)
             .ifPresentOrElse(
                 user -> {
-                    if (Objects.equals(user.getPassword(), password)) ref.set(user);
-                    else throw new AuthenticationException();
-                },
-                () -> { throw new EmailNotFoundException(email); }
+                    if (Objects.equals(user.getPassword(), password)) {
+                        atomicUser.set(user);
+                    } else {
+                        throw new AuthenticationException();
+                    }
+                }, () -> {
+                    throw new EmailNotFoundException(email);
+                }
             );
-        return ref.get();
+        return atomicUser.get();
     }
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
