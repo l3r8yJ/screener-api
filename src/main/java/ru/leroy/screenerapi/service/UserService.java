@@ -23,6 +23,7 @@ public class UserService {
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
         AtomicReference<UserEntity> ref = new AtomicReference<>();
+        user.setRate("free");
         this.repository
             .findByEmail(user.getEmail())
             .ifPresentOrElse(
