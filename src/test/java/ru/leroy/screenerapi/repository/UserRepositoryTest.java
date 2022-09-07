@@ -47,7 +47,7 @@ class UserRepositoryTest {
     @Test
     void shouldToGiveUserByMail_success() {
         assertThat(usr.getEmail())
-            .isEqualTo(underTest.findByEmail(usr.getEmail()).orElseThrow().getEmail());
+            .isEqualTo(underTest.findByEmail(usr.getEmail()).orElseThrow(UserNotFoundException::new).getEmail());
     }
 
     @Test
