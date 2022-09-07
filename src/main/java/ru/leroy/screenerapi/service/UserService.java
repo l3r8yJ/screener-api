@@ -8,7 +8,6 @@ import ru.leroy.screenerapi.exception.EmailNotFoundException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.repository.UserRepository;
 
-import javax.validation.Valid;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
