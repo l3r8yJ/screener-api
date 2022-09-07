@@ -4,10 +4,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.leroy.screenerapi.entity.UserEntity;
+import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
+import ru.leroy.screenerapi.exception.EmailNotFoundException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.message.ResponseMessages;
 import ru.leroy.screenerapi.service.UserService;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/user")
@@ -19,9 +23,9 @@ public class UserController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<?> registration(@RequestBody final UserEntity user) {
+    public ResponseEntity<?> registration(@Valid @RequestBody final UserEntity user) {
         try {
-            UserEntity registered = service.registration(user);
+            final UserEntity registered = service.registration(user);
             return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(registered);
@@ -36,8 +40,30 @@ public class UserController {
         }
     }
 
+    @PostMapping("/authentication")
+    public ResponseEntity<?> authentication(@Valid @RequestBody final UserEntity user) {
+        try {
+            final UserEntity auth = this.service.authentication(user.getEmail(), user.getPassword());
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(auth);
+        } catch (final EmailNotFoundException ex) {
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+        } catch (final AuthenticationException ex) {
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ex.getMessage());
+        } catch (final Exception ex) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ResponseMessages.UNEXPECTED_ERROR);
+        }
+    }
+
     @GetMapping("/info/{id}")
-    public ResponseEntity<?> userById(@PathVariable final Long id) {
+    public ResponseEntity<?> userById(@Valid @PathVariable final Long id) {
         try {
             final UserEntity user = this.service.userById(id);
             return ResponseEntity
