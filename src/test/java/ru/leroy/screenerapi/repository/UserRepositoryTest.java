@@ -8,10 +8,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
-import ru.leroy.screenerapi.util.Foo;
+import ru.leroy.screenerapi.util.Names;
 
 import java.time.Instant;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -30,7 +29,7 @@ class UserRepositoryTest {
     void setUp() {
         usr = new UserEntity();
         usr.setId(new Random().nextLong());
-        usr.setRate("free");
+        usr.setRate(Names.FREE_RATE);
         usr.setEmail(RandomString.make().concat("@gmail.com"));
         usr.setPassword(RandomString.make().concat("-pass-from-test"));
         usr.setExpiration(Instant.now());
@@ -41,7 +40,7 @@ class UserRepositoryTest {
     void shouldToGiveUserByMail_fail() {
         assertThrows(
             UserNotFoundException.class,
-            () -> underTest.findByEmail(Foo.FOO).orElseThrow(UserNotFoundException::new)
+            () -> underTest.findByEmail(Names.FOO).orElseThrow(UserNotFoundException::new)
         );
     }
 

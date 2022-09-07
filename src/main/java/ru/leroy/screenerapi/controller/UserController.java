@@ -2,7 +2,6 @@ package ru.leroy.screenerapi.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.*;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.EmailExistException;
