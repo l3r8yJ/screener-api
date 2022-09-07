@@ -1,12 +1,14 @@
 package ru.leroy.screenerapi.service;
 
-import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 import ru.leroy.screenerapi.entity.UserEntity;
+import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
+import ru.leroy.screenerapi.exception.EmailNotFoundException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.repository.UserRepository;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -19,6 +21,20 @@ public class UserService {
 
     public UserEntity userById(final Long id) throws UserNotFoundException {
         return userBy(id);
+    }
+
+    public UserEntity authentication(final String email, final String password) {
+        AtomicReference<UserEntity> ref = new AtomicReference<>();
+        this.repository
+            .findByEmail(email)
+            .ifPresentOrElse(
+                user -> {
+                    if (Objects.equals(user.getPassword(), password)) ref.set(user);
+                    else throw new AuthenticationException();
+                },
+                () -> { throw new EmailNotFoundException(email); }
+            );
+        return ref.get();
     }
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
