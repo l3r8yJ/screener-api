@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Getter
 @Setter
 @ToString
@@ -19,10 +19,10 @@ public class UserEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "email", nullable = false, length = 45)
+    @Column(name = "user_email", nullable = false, length = 45)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 45)
+    @Column(name = "user_password", nullable = false, length = 45)
     private String password;
 
     @Column(name = "rate", length = 45)
