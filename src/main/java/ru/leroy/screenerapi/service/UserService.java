@@ -29,19 +29,13 @@ public class UserService {
 
     public UserEntity authentication(final UserEntity auth)
         throws AuthenticationException, EmailNotFoundException {
-        return this.repository
+        final UserEntity user = this.repository
             .findByEmail(auth.getEmail())
-            .map(
-                usr -> {
-                    if (!Objects.equals(usr.getPassword(), auth.getPassword())) {
-                        throw new AuthenticationException();
-                    }
-                    return usr;
-                }
-            )
-            .orElseThrow(
-                () -> { throw new EmailNotFoundException(auth.getEmail()); }
-            );
+            .orElseThrow(() -> new EmailNotFoundException(auth.getEmail()));
+        if (!Objects.equals(user.getPassword(), auth.getPassword())) {
+            throw new AuthenticationException();
+        }
+        return user;
     }
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
