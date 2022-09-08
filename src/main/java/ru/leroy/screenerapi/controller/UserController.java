@@ -18,14 +18,14 @@ import javax.validation.Valid;
 public class UserController {
     private final UserService service;
 
-    public UserController(UserService service) {
+    public UserController(final UserService service) {
         this.service = service;
     }
 
     @PostMapping("/registration")
     public ResponseEntity<?> registration(@Valid @RequestBody final UserEntity user) {
         try {
-            final UserEntity registered = service.registration(user);
+            final UserEntity registered = this.service.registration(user);
             return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(registered);
@@ -54,6 +54,42 @@ public class UserController {
         } catch (final AuthenticationException ex) {
             return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
+                .body(ex.getMessage());
+        } catch (final Exception ex) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ResponseMessages.UNEXPECTED_ERROR);
+        }
+    }
+
+    @PostMapping("/change-password/{id}")
+    public ResponseEntity<?> updatePasswordById(@Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
+        try {
+            this.service.updateUserPasswordById(id, user.getPassword());
+            return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(ResponseMessages.PASSWORD_UPDATED);
+        } catch (final UserNotFoundException ex) {
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+        } catch (final Exception ex) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ResponseMessages.UNEXPECTED_ERROR);
+        }
+    }
+
+    @PostMapping("change-rate/{id}")
+    public ResponseEntity<?> updateRateById(@Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
+        try {
+            this.service.switchUserRateById(id, user.getRate());
+            return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(ResponseMessages.RATE_UPDATED);
+        } catch (final UserNotFoundException ex) {
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
         } catch (final Exception ex) {
             return ResponseEntity

@@ -1,6 +1,9 @@
 package ru.leroy.screenerapi.entity;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -32,15 +35,15 @@ public class UserEntity {
     private Instant expiration;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        UserEntity that = (UserEntity) o;
-        return id != null && Objects.equals(id, that.id);
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (null == obj || Hibernate.getClass(this) != Hibernate.getClass(obj)) return false;
+        final UserEntity that = (UserEntity) obj;
+        return null != this.id && Objects.equals(this.id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return this.getClass().hashCode();
     }
 }
