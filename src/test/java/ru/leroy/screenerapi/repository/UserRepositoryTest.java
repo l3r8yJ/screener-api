@@ -1,6 +1,5 @@
 package ru.leroy.screenerapi.repository;
 
-import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,13 +7,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
-import ru.leroy.screenerapi.util.Names;
+import ru.leroy.screenerapi.util.UsersUtil;
 
-import java.time.Instant;
 import java.util.Random;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -23,55 +21,50 @@ class UserRepositoryTest {
     @Autowired
     private UserRepository underTest;
 
-    private UserEntity usr;
+    private UserEntity user;
 
     @BeforeEach
     void setUp() {
-        usr = new UserEntity();
-        usr.setId(new Random().nextLong());
-        usr.setRate(Names.FREE_RATE);
-        usr.setEmail(RandomString.make().concat("@gmail.com"));
-        usr.setPassword(RandomString.make().concat("-pass-from-test"));
-        usr.setExpiration(Instant.now());
-        underTest.save(usr);
+        this.user = new UsersUtil().buildRandomUser();
+        this.underTest.save(this.user);
     }
 
     @Test
     void shouldToGiveUserByMail_fail() {
         assertThrows(
             UserNotFoundException.class,
-            () -> underTest.findByEmail(Names.FOO).orElseThrow(UserNotFoundException::new)
+            () -> this.underTest.findByEmail("foo").orElseThrow(UserNotFoundException::new)
         );
     }
 
     @Test
     void shouldToGiveUserByMail_success() {
-        assertThat(usr.getEmail())
-            .isEqualTo(underTest.findByEmail(usr.getEmail()).orElseThrow(UserNotFoundException::new).getEmail());
+        assertThat(this.user.getEmail())
+            .isEqualTo(this.underTest.findByEmail(this.user.getEmail()).orElseThrow(UserNotFoundException::new).getEmail());
     }
 
     @Test
     void shouldFindUserById_fail() {
-        assertThat(underTest.findById(new Random().nextLong()))
+        assertThat(this.underTest.findById(new Random().nextLong()))
             .isNotPresent();
     }
 
     @Test
     void shouldFindUserById_success() {
-        UserEntity exist = underTest.findByEmail(usr.getEmail()).orElseThrow();
-        assertThat(underTest.findById(exist.getId())).isPresent();
+        final UserEntity exist = this.underTest.findByEmail(this.user.getEmail()).orElseThrow();
+        assertThat(this.underTest.findById(exist.getId())).isPresent();
     }
 
     @Test
     void shouldExistUserById_fail() {
-        assertThat(underTest.existsById(new Random().nextLong()))
+        assertThat(this.underTest.existsById(new Random().nextLong()))
             .isFalse();
     }
 
     @Test
     void shouldExistUserById_success() {
-        UserEntity exist = underTest.findByEmail(usr.getEmail()).orElseThrow();
-        assertThat(underTest.existsById(exist.getId()))
+        final UserEntity exist = this.underTest.findByEmail(this.user.getEmail()).orElseThrow();
+        assertThat(this.underTest.existsById(exist.getId()))
             .isTrue();
     }
 }
