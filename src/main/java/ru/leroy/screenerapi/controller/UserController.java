@@ -43,7 +43,7 @@ public class UserController {
     @PostMapping("/authentication")
     public ResponseEntity<?> authentication(@Valid @RequestBody final UserEntity user) {
         try {
-            final UserEntity auth = this.service.authentication(user.getEmail(), user.getPassword());
+            final UserEntity auth = this.service.authentication(user);
             return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(auth);
