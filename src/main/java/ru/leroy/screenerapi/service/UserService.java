@@ -15,16 +15,17 @@ import java.util.concurrent.atomic.AtomicReference;
 public class UserService {
     private final UserRepository repository;
 
-    public UserService(UserRepository repository) {
+    public UserService(final UserRepository repository) {
         this.repository = repository;
     }
 
     public UserEntity userById(final Long id) throws UserNotFoundException {
-        return userBy(id);
+        return this.userBy(id);
     }
 
-    public UserEntity authentication(final String email, final String password) {
-        AtomicReference<UserEntity> atomicUser = new AtomicReference<>();
+    public UserEntity authentication(final String email, final String password)
+        throws AuthenticationException, EmailNotFoundException {
+        final AtomicReference<UserEntity> atomicUser = new AtomicReference<>();
         this.repository
             .findByEmail(email)
             .ifPresentOrElse(
@@ -42,7 +43,7 @@ public class UserService {
     }
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
-        AtomicReference<UserEntity> ref = new AtomicReference<>();
+        final AtomicReference<UserEntity> ref = new AtomicReference<>();
         user.setRate("free");
         this.repository
             .findByEmail(user.getEmail())
@@ -55,19 +56,19 @@ public class UserService {
     }
 
     public UserEntity updateUserPasswordById(final Long id, final String pass) throws UserNotFoundException {
-        UserEntity updated = userBy(id);
+        final UserEntity updated = this.userBy(id);
         updated.setPassword(pass);
-        return repository.save(updated);
+        return this.repository.save(updated);
     }
 
     public UserEntity switchUserRateById(final Long id, final String rate) throws UserNotFoundException {
-        UserEntity updated = userBy(id);
+        final UserEntity updated = this.userBy(id);
         updated.setRate(rate);
-        return repository.save(updated);
+        return this.repository.save(updated);
     }
 
 
-    private UserEntity userBy(Long id) throws UserNotFoundException {
+    private UserEntity userBy(final Long id) throws UserNotFoundException {
         return this.repository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 }
