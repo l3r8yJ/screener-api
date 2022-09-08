@@ -24,15 +24,15 @@ public class UserService {
         return this.userBy(id);
     }
 
-    public UserEntity authentication(final String email, final String password)
+    public UserEntity authentication(final String email,  final String password)
         throws AuthenticationException, EmailNotFoundException {
-        final AtomicReference<UserEntity> atomicUser = new AtomicReference<>();
+        final AtomicReference<UserEntity> atomic = new AtomicReference<>();
         this.repository
             .findByEmail(email)
             .ifPresentOrElse(
                 user -> {
                     if (Objects.equals(user.getPassword(), password)) {
-                        atomicUser.set(user);
+                        atomic.set(user);
                     } else {
                         throw new AuthenticationException();
                     }
@@ -41,7 +41,7 @@ public class UserService {
                     throw new EmailNotFoundException(email);
                 }
             );
-        return atomicUser.get();
+        return atomic.get();
     }
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
