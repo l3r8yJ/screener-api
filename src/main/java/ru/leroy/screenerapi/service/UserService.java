@@ -10,7 +10,6 @@ import ru.leroy.screenerapi.message.RateNames;
 import ru.leroy.screenerapi.repository.UserRepository;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class UserService {
@@ -32,12 +31,13 @@ public class UserService {
         throws AuthenticationException, EmailNotFoundException {
         return this.repository
             .findByEmail(auth.getEmail())
-            .map(usr -> {
-                if (!Objects.equals(usr.getPassword(), auth.getPassword())) {
-                    throw new AuthenticationException();
+            .map(
+                usr -> {
+                    if (!Objects.equals(usr.getPassword(), auth.getPassword())) {
+                        throw new AuthenticationException();
+                    }
+                    return usr;
                 }
-                return usr;
-            }
             )
             .orElseThrow(
                 () -> { throw new EmailNotFoundException(auth.getEmail()); }
@@ -45,17 +45,13 @@ public class UserService {
     }
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
-        final AtomicReference<UserEntity> ref = new AtomicReference<>();
-        user.setRate(RateNames.FREE_RATE);
         this.repository
             .findByEmail(user.getEmail())
             .ifPresentOrElse(
-                usr -> {
-                    throw new EmailExistException();
-                },
-                () -> ref.set(this.repository.save(user))
+                (usr) -> { throw new EmailExistException(usr.getEmail()); },
+                () -> user.setRate(RateNames.FREE_RATE)
             );
-        return ref.get();
+        return this.repository.save(user);
     }
 
     public UserEntity updateUserPasswordById(final Long id, final String pass) throws UserNotFoundException {
@@ -72,6 +68,8 @@ public class UserService {
 
 
     private UserEntity userBy(final Long id) throws UserNotFoundException {
-        return this.repository.findById(id).orElseThrow(UserNotFoundException::new);
+        return this.repository
+            .findById(id)
+            .orElseThrow(UserNotFoundException::new);
     }
 }
