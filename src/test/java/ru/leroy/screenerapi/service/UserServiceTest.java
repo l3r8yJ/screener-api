@@ -81,8 +81,7 @@ class UserServiceTest {
     @Test
     void userAuthentication_throwAuthenticationException() {
         given(this.repository.findByEmail(this.user.getEmail()))
-            .willReturn(Optional.of(this.user));
-        this.user.setPassword("foo");
+            .willReturn(Optional.of(withWrongPassword(this.user)));
         assertThatThrownBy(() -> this.underTest.authentication(this.user))
             .isInstanceOf(AuthenticationException.class)
             .hasMessageContaining(new AuthenticationException().getMessage());
@@ -93,5 +92,15 @@ class UserServiceTest {
         assertThatThrownBy(() -> this.underTest.authentication(this.user))
             .isInstanceOf(EmailNotFoundException.class)
             .hasMessageContaining(new EmailNotFoundException(this.user.getEmail()).getMessage());
+    }
+
+    private static UserEntity withWrongPassword(final UserEntity user) {
+        final UserEntity copy = new UserEntity();
+        copy.setId(user.getId());
+        copy.setEmail(user.getEmail());
+        copy.setPassword("wrong password");
+        copy.setRate(user.getRate());
+        copy.setExpiration(user.getExpiration());
+        return copy;
     }
 }
