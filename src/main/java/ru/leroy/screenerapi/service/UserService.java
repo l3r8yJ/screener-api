@@ -6,6 +6,7 @@ import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
+import ru.leroy.screenerapi.message.RateNames;
 import ru.leroy.screenerapi.repository.UserRepository;
 
 import java.util.Objects;
@@ -35,7 +36,8 @@ public class UserService {
                     } else {
                         throw new AuthenticationException();
                     }
-                }, () -> {
+                },
+                () -> {
                     throw new EmailNotFoundException(email);
                 }
             );
@@ -44,13 +46,14 @@ public class UserService {
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
         final AtomicReference<UserEntity> ref = new AtomicReference<>();
-        user.setRate("free");
+        user.setRate(RateNames.FREE_RATE);
         this.repository
             .findByEmail(user.getEmail())
             .ifPresentOrElse(
                 usr -> {
                     throw new EmailExistException();
-                }, () -> ref.set(this.repository.save(user))
+                },
+                () -> ref.set(this.repository.save(user))
             );
         return ref.get();
     }
