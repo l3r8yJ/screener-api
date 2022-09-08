@@ -20,6 +20,10 @@ public class UserService {
         this.repository = repository;
     }
 
+    public Iterable<UserEntity> index() {
+        return this.repository.findAll();
+    }
+
     public UserEntity userById(final Long id) throws UserNotFoundException {
         return this.userBy(id);
     }

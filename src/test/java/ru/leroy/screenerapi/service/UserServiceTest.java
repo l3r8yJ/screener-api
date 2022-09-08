@@ -2,39 +2,63 @@ package ru.leroy.screenerapi.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.EmailExistException;
+import ru.leroy.screenerapi.repository.UserRepository;
 import ru.leroy.screenerapi.util.UsersUtil;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Optional;
 
-@DataJpaTest
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
 class UserServiceTest {
 
-    @MockBean
+    @Mock
+    private UserRepository repository;
+
     private UserService underTest;
 
     private UserEntity user;
 
     @BeforeEach
     void setUp() {
+        this.underTest = new UserService(this.repository);
         this.user = new UsersUtil().buildRandomUser();
     }
 
     @Test
-    void registrationUser_success() {
-        assertThat(this.underTest.registration(this.user))
-            .isNotNull();
+    void canGetAllUsers() {
+        this.underTest.index();
+        verify(this.repository).findAll();
     }
 
     @Test
-    void registrationUser_fail() {
+    void userRegistration_success() {
         this.underTest.registration(this.user);
-        assertThrows(EmailExistException.class, () -> { this.underTest.registration(this.user); });
+        final ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(this.repository)
+            .save(captor.capture());
+        final UserEntity captured = captor.getValue();
+        assertThat(captured)
+            .isEqualTo(this.user);
+    }
+
+    @Test
+    void userRegistration_failWithThrowEmailException() {
+        given(this.repository.findByEmail(this.user.getEmail()))
+            .willReturn(Optional.of(this.user));
+        assertThatThrownBy(() -> this.underTest.registration(this.user))
+            .isInstanceOf(EmailExistException.class)
+            .hasMessageContaining(new EmailExistException().getMessage());
     }
 }
