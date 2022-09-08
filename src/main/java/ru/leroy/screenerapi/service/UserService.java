@@ -20,28 +20,28 @@ public class UserService {
         this.repository = repository;
     }
 
+    public Iterable<UserEntity> index() {
+        return this.repository.findAll();
+    }
+
     public UserEntity userById(final Long id) throws UserNotFoundException {
         return this.userBy(id);
     }
 
-    public UserEntity authentication(final String email, final String password)
+    public UserEntity authentication(final UserEntity auth)
         throws AuthenticationException, EmailNotFoundException {
-        final AtomicReference<UserEntity> atomicUser = new AtomicReference<>();
-        this.repository
-            .findByEmail(email)
-            .ifPresentOrElse(
-                user -> {
-                    if (Objects.equals(user.getPassword(), password)) {
-                        atomicUser.set(user);
-                    } else {
-                        throw new AuthenticationException();
-                    }
-                },
-                () -> {
-                    throw new EmailNotFoundException(email);
+        return this.repository
+            .findByEmail(auth.getEmail())
+            .map(usr -> {
+                if (!Objects.equals(usr.getPassword(), auth.getPassword())) {
+                    throw new AuthenticationException();
                 }
+                return usr;
+            }
+            )
+            .orElseThrow(
+                () -> { throw new EmailNotFoundException(auth.getEmail()); }
             );
-        return atomicUser.get();
     }
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
