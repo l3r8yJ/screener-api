@@ -27,5 +27,5 @@ jobs:
       run: |
         docker build -t screener_api_image .
         docker tag screener_api_image l3r8y/screener_api_image:screener_api_image
-        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
         docker push l3r8y/screener_api_image:screener_api_image
