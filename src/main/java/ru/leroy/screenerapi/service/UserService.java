@@ -40,7 +40,7 @@ public class UserService {
         user.setRate(RateNames.FREE_RATE);
         this.repository
             .findByEmail(user.getEmail())
-            .ifPresent((usr) -> { throw new EmailExistException(); });
+            .ifPresent((usr) -> { throw new EmailExistException(user.getEmail()); });
         return this.repository.save(user);
     }
 
@@ -56,7 +56,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity switchUserRateById(final Long id, final String rate) throws UserNotFoundException {
+    public UserEntity updateRateById(final Long id, final String rate) throws UserNotFoundException {
         final UserEntity updated = this.userBy(id);
         updated.setRate(rate);
         return this.repository.save(updated);

@@ -83,7 +83,7 @@ public class UserController {
     @PutMapping("change-rate/{id}")
     public ResponseEntity<?> updateRateById(@Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
         try {
-            this.service.switchUserRateById(id, user.getRate());
+            this.service.updateRateById(id, user.getRate());
             return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(ResponseMessages.RATE_UPDATED);
