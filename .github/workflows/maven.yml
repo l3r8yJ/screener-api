@@ -7,64 +7,32 @@ on:
     branches: [ "master" ]
 
 jobs:
-  test-host:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Verify MySQL connection from host
-      run: |
-        sudo apt-get install -y mysql-client
-        mysql --host 127.0.0.1 --port 3306 -uroot -ppassword -e "SHOW DATABASES"
   build:
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: rootroot
-        ports:
-        - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-    - name: Verify MySQL connection from host
-      run: |
-       sudo apt-get install -y mysql-client
-       mysql --host 127.0.0.1 --port 3306 -uroot -prootroot -e "SHOW DATABASES"
-       CREATE DATABASE `screener_db` /*!40100 DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-       CREATE TABLE `users` (
-        `id` int unsigned NOT NULL AUTO_INCREMENT,
-        `user_email` varchar(45) COLLATE utf8mb3_unicode_ci NOT NULL,
-        `user_password` varchar(45) COLLATE utf8mb3_unicode_ci NOT NULL,
-        `rate` varchar(45) COLLATE utf8mb3_unicode_ci DEFAULT 'free',
-        `expiration` datetime DEFAULT NULL,
-        PRIMARY KEY (`id`),
-        UNIQUE KEY `id_UNIQUE` (`id`),
-        UNIQUE KEY `email_UNIQUE` (`user_email`)
-        ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
-  
     - name: Checkout main branch
       uses: actions/checkout@v3
-      
+
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: 17
         distribution: 'temurin'
         cache: maven
-        
+
     - name: Run Java version
       run: java --version  
-      
+
     - name: Run maven version
       run: mvn -v
-      
+
     - name: Check current directory
       run: ls -a
-      
+
     - name: Build with Maven
       run: mvn --errors --batch-mode test
-      
+
     - name: Check target dir
       run: |
         cd target
