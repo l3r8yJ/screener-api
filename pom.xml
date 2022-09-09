@@ -211,6 +211,7 @@ SOFTWARE.
         </executions>
       </plugin>
     </plugins>
+    <finalName>screener_api_image</finalName>
   </build>
   <repositories>
     <repository>
