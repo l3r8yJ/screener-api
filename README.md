@@ -49,3 +49,14 @@
 >>  "expiration": null
 >> }
 >> ``` 
+
+> # Contribution 
+> ### How to contibute? 
+>
+> - Create a *fork*
+> - Create a *branch*  
+> - Do *improvments*
+> - Send *pull request*
+>
+> Run `mvn clean install` before sending a pull request to avoid confusing situations.
+>
