@@ -31,7 +31,7 @@ jobs:
       run: ls -a
       
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn --errors --batch-mode test
       
     - name: Check target dir
       run: |
