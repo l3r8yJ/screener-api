@@ -61,12 +61,12 @@ class UserServiceTest {
     }
 
     @Test
-    void userRegistration_failWithThrowEmailException() {
+    void userRegistration_failWithThrowEmailExistException() {
         given(this.repository.findByEmail(this.user.getEmail()))
             .willReturn(Optional.of(this.user));
         assertThatThrownBy(() -> this.underTest.registration(this.user))
             .isInstanceOf(EmailExistException.class)
-            .hasMessageContaining(new EmailExistException().getMessage());
+            .hasMessageContaining(new EmailExistException(this.user.getEmail()).getMessage());
         verify(this.repository, never()).save(any());
     }
 
