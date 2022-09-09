@@ -25,6 +25,9 @@ jobs:
     - name: DockerHub logout
       run: docker logout
 
+    - name: DockerHub login
+      run: docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
+
     - name: Build & push Docker image
       uses: mr-smithers-excellent/docker-build-push@v5
       with:
