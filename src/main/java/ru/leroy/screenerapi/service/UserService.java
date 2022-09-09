@@ -56,7 +56,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity switchUserRateById(final Long id, final String rate) throws UserNotFoundException {
+    public UserEntity updateRateById(final Long id, final String rate) throws UserNotFoundException {
         final UserEntity updated = this.userBy(id);
         updated.setRate(rate);
         return this.repository.save(updated);
