@@ -1,7 +1,6 @@
 package ru.leroy.screenerapi.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.*;
 import ru.leroy.screenerapi.message.RateNames;
@@ -44,7 +43,6 @@ public class UserService {
         return this.repository.save(user);
     }
 
-    @Transactional
     public UserEntity updateUserPasswordById(final Long id, final String pass)
         throws UserNotFoundException, SamePasswordException {
         final UserEntity updated = this.userBy(id);
@@ -52,14 +50,16 @@ public class UserService {
             throw new SamePasswordException();
         }
         updated.setPassword(pass);
-        return this.userBy(id);
+        return updated;
     }
 
-    @Transactional
     public UserEntity updateRateById(final Long id, final String rate) throws UserNotFoundException {
         final UserEntity updated = this.userBy(id);
+        if (Objects.equals(rate, updated.getRate())) {
+            throw new SameRateException();
+        }
         updated.setRate(rate);
-        return this.repository.save(updated);
+        return updated;
     }
 
 
