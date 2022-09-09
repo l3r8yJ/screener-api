@@ -8,12 +8,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import ru.leroy.screenerapi.entity.UserEntity;
-import ru.leroy.screenerapi.exception.AuthenticationException;
-import ru.leroy.screenerapi.exception.EmailExistException;
-import ru.leroy.screenerapi.exception.EmailNotFoundException;
-import ru.leroy.screenerapi.exception.SamePasswordException;
+import ru.leroy.screenerapi.exception.*;
 import ru.leroy.screenerapi.repository.UserRepository;
 import ru.leroy.screenerapi.util.UsersUtil;
 
@@ -98,12 +94,15 @@ class UserServiceTest {
     }
 
     @Test
-    @Transactional
     void updatePasswordById_success() {
         given(this.repository.findById(this.user.getId()))
             .willReturn(Optional.of(this.user));
         final UserEntity actual = this.underTest.updateUserPasswordById(this.user.getId(), "new password");
         final UserEntity expected = withNewPassword(actual, "new password");
+        assertThat(actual)
+            .isNotNull()
+            .isInstanceOf(expected.getClass())
+            .isEqualTo(expected);
         assertThat(actual.getPassword()).isEqualTo(expected.getPassword());
     }
 
@@ -115,6 +114,30 @@ class UserServiceTest {
         )
             .isInstanceOf(SamePasswordException.class)
             .hasMessageContaining(new SamePasswordException().getMessage());
+        verify(this.repository, never()).save(any());
+    }
+
+    @Test
+    void updateRateById_success() {
+        given(this.repository.findById(this.user.getId()))
+            .willReturn(Optional.of(this.user));
+        final UserEntity actual = this.underTest.updateRateById(this.user.getId(), "free");
+        this.user.setRate("free");
+        assertThat(actual)
+            .isNotNull()
+            .isInstanceOf(this.user.getClass())
+            .isEqualTo(this.user);
+        assertThat(actual.getRate()).isEqualTo(this.user.getRate());
+    }
+
+    @Test
+    void updateRateById_failWithSameRateException() {
+        given(this.repository.findById(this.user.getId()))
+            .willReturn(Optional.of(this.user));
+        this.user.setRate("free");
+        assertThatThrownBy(() -> this.underTest.updateRateById(this.user.getId(), "free"))
+            .isInstanceOf(SameRateException.class)
+            .hasMessageContaining(new SameRateException().getMessage());
         verify(this.repository, never()).save(any());
     }
 
