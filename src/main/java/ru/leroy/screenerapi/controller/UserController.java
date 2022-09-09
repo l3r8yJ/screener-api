@@ -80,7 +80,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("change-rate/{id}")
+    @PutMapping("/change-rate/{id}")
     public ResponseEntity<?> updateRateById(@Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
         try {
             this.service.updateRateById(id, user.getRate());

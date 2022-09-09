@@ -119,6 +119,7 @@ class UserServiceTest {
 
     @Test
     void updateRateById_success() {
+        this.user.setRate("pro");
         given(this.repository.findById(this.user.getId()))
             .willReturn(Optional.of(this.user));
         final UserEntity actual = this.underTest.updateRateById(this.user.getId(), "free");
