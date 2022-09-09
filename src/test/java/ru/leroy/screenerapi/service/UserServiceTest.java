@@ -1,5 +1,6 @@
 package ru.leroy.screenerapi.service;
 
+import lombok.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,9 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 import ru.leroy.screenerapi.entity.UserEntity;
-import ru.leroy.screenerapi.exception.AuthenticationException;
-import ru.leroy.screenerapi.exception.EmailExistException;
-import ru.leroy.screenerapi.exception.EmailNotFoundException;
+import ru.leroy.screenerapi.exception.*;
 import ru.leroy.screenerapi.repository.UserRepository;
 import ru.leroy.screenerapi.util.UsersUtil;
 
@@ -81,7 +80,7 @@ class UserServiceTest {
     @Test
     void userAuthentication_throwAuthenticationException() {
         given(this.repository.findByEmail(this.user.getEmail()))
-            .willReturn(Optional.of(withWrongPassword(this.user)));
+            .willReturn(Optional.of(withNewPassword(this.user, "wrong password")));
         assertThatThrownBy(() -> this.underTest.authentication(this.user))
             .isInstanceOf(AuthenticationException.class)
             .hasMessageContaining(new AuthenticationException().getMessage());
@@ -94,11 +93,59 @@ class UserServiceTest {
             .hasMessageContaining(new EmailNotFoundException(this.user.getEmail()).getMessage());
     }
 
-    private static UserEntity withWrongPassword(final UserEntity user) {
+    @Test
+    void updatePasswordById_success() {
+        given(this.repository.findById(this.user.getId()))
+            .willReturn(Optional.of(this.user));
+        final UserEntity actual = this.underTest.updateUserPasswordById(this.user.getId(), "new password");
+        final UserEntity expected = withNewPassword(actual, "new password");
+        assertThat(actual)
+            .isNotNull()
+            .isInstanceOf(expected.getClass())
+            .isEqualTo(expected);
+        assertThat(actual.getPassword()).isEqualTo(expected.getPassword());
+    }
+
+    @Test
+    void updatePasswordById_failWithSamePasswordExceptionThrown() {
+        given(this.repository.findById(this.user.getId())).willReturn(Optional.of(this.user));
+        assertThatThrownBy(
+            () -> this.underTest.updateUserPasswordById(this.user.getId(), this.user.getPassword())
+        )
+            .isInstanceOf(SamePasswordException.class)
+            .hasMessageContaining(new SamePasswordException().getMessage());
+        verify(this.repository, never()).save(any());
+    }
+
+    @Test
+    void updateRateById_success() {
+        given(this.repository.findById(this.user.getId()))
+            .willReturn(Optional.of(this.user));
+        final UserEntity actual = this.underTest.updateRateById(this.user.getId(), "free");
+        this.user.setRate("free");
+        assertThat(actual)
+            .isNotNull()
+            .isInstanceOf(this.user.getClass())
+            .isEqualTo(this.user);
+        assertThat(actual.getRate()).isEqualTo(this.user.getRate());
+    }
+
+    @Test
+    void updateRateById_failWithSameRateException() {
+        given(this.repository.findById(this.user.getId()))
+            .willReturn(Optional.of(this.user));
+        this.user.setRate("free");
+        assertThatThrownBy(() -> this.underTest.updateRateById(this.user.getId(), "free"))
+            .isInstanceOf(SameRateException.class)
+            .hasMessageContaining(new SameRateException().getMessage());
+        verify(this.repository, never()).save(any());
+    }
+
+    private static UserEntity withNewPassword(@NonNull final UserEntity user, final String pass) {
         final UserEntity copy = new UserEntity();
         copy.setId(user.getId());
         copy.setEmail(user.getEmail());
-        copy.setPassword("wrong password");
+        copy.setPassword(pass);
         copy.setRate(user.getRate());
         copy.setExpiration(user.getExpiration());
         return copy;
