@@ -40,7 +40,7 @@ public class UserService {
         user.setRate(RateNames.FREE_RATE);
         this.repository
             .findByEmail(user.getEmail())
-            .ifPresent((usr) -> { throw new EmailExistException(); });
+            .ifPresent((usr) -> { throw new EmailExistException(user.getEmail()); });
         return this.repository.save(user);
     }
 
