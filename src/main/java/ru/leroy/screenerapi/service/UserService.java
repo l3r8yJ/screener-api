@@ -1,16 +1,13 @@
 package ru.leroy.screenerapi.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.leroy.screenerapi.entity.UserEntity;
-import ru.leroy.screenerapi.exception.AuthenticationException;
-import ru.leroy.screenerapi.exception.EmailExistException;
-import ru.leroy.screenerapi.exception.EmailNotFoundException;
-import ru.leroy.screenerapi.exception.UserNotFoundException;
+import ru.leroy.screenerapi.exception.*;
 import ru.leroy.screenerapi.message.RateNames;
 import ru.leroy.screenerapi.repository.UserRepository;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class UserService {
@@ -45,25 +42,25 @@ public class UserService {
     }
 
     public UserEntity registration(final UserEntity user) throws EmailExistException {
-        final AtomicReference<UserEntity> ref = new AtomicReference<>();
         user.setRate(RateNames.FREE_RATE);
         this.repository
             .findByEmail(user.getEmail())
-            .ifPresentOrElse(
-                usr -> {
-                    throw new EmailExistException();
-                },
-                () -> ref.set(this.repository.save(user))
-            );
-        return ref.get();
+            .ifPresent((usr) -> { throw new EmailExistException(); });
+        return this.repository.save(user);
     }
 
-    public UserEntity updateUserPasswordById(final Long id, final String pass) throws UserNotFoundException {
+    @Transactional
+    public UserEntity updateUserPasswordById(final Long id, final String pass)
+        throws UserNotFoundException, SamePasswordException {
         final UserEntity updated = this.userBy(id);
+        if (Objects.equals(pass, updated.getPassword())) {
+            throw new SamePasswordException();
+        }
         updated.setPassword(pass);
-        return this.repository.save(updated);
+        return this.userBy(id);
     }
 
+    @Transactional
     public UserEntity switchUserRateById(final Long id, final String rate) throws UserNotFoundException {
         final UserEntity updated = this.userBy(id);
         updated.setRate(rate);
