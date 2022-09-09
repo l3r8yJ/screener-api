@@ -31,3 +31,6 @@ jobs:
         dockerfile: Dockerfile
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Tag image
+      run: docker tag screener_api_image l3r8y/screener_api_image
