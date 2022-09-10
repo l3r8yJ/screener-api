@@ -23,6 +23,7 @@ import ru.leroy.screenerapi.util.UsersUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,5 +70,21 @@ class UserControllerTest {
         assertThat(response.getContentAsString()).isEqualTo(
             this.userJson.write(this.userEntity).getJson()
         );
+    }
+
+    @Test
+    void info_success() throws Exception {
+        given(this.service.userById(this.userEntity.getId()))
+            .willReturn(this.userEntity);
+        final MockHttpServletResponse response = this.mvc.perform(
+            get("/user/info/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.ACCEPTED.value());
+        assertThat(response.getContentAsString())
+            .isEqualTo(this.userJson.write(this.userEntity).getJson());
     }
 }
