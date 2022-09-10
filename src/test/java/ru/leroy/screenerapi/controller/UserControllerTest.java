@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.leroy.screenerapi.entity.UserEntity;
+import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.service.UserService;
 import ru.leroy.screenerapi.util.UsersUtil;
 
@@ -86,5 +87,35 @@ class UserControllerTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.ACCEPTED.value());
         assertThat(response.getContentAsString())
             .isEqualTo(this.userJson.write(this.userEntity).getJson());
+    }
+
+    @Test
+    void info_notFound() throws Exception {
+        given(this.service.userById(this.userEntity.getId()))
+            .willThrow(UserNotFoundException.class);
+        final MockHttpServletResponse response = this.mvc.perform(
+                get("/user/info/".concat(String.valueOf(this.userEntity.getId())))
+                    .content(this.userJson.write(this.userEntity).getJson())
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
+        assertThat(response.getStatus())
+            .isEqualTo(HttpStatus.NOT_FOUND.value());
+    }
+
+    @Test
+    void info_badRequest() throws Exception {
+        given(this.service.userById(this.userEntity.getId()))
+            .willThrow(IllegalStateException.class);
+        final MockHttpServletResponse response = this.mvc.perform(
+                get("/user/info/".concat(String.valueOf(this.userEntity.getId())))
+                    .content(this.userJson.write(this.userEntity).getJson())
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
+        assertThat(response.getStatus())
+            .isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 }
