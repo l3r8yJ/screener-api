@@ -110,7 +110,6 @@ public class UserService {
     return updated;
   }
 
-
   private UserEntity userBy(final Long id) throws UserNotFoundException {
     return this.repository
         .findById(id)
