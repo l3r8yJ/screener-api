@@ -6,6 +6,7 @@ import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
+import ru.leroy.screenerapi.exception.PasswordNotFoundException;
 import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.SameRateException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
@@ -56,6 +57,7 @@ public class UserService {
    * @param user as json with by email and password
    * @return new user
    * @throws EmailExistException when entered email exist
+   * @throws PasswordNotFoundException when password not found
   */
   public UserEntity registration(final UserEntity user) throws EmailExistException {
     user.setRate(RateNames.FREE_RATE);
@@ -64,6 +66,9 @@ public class UserService {
         .ifPresent((usr) -> {
           throw new EmailExistException(user.getEmail());
         });
+    if (Objects.isNull(user.getPassword())) {
+      throw new PasswordNotFoundException();
+    }
     return this.repository.save(user);
   }
 
