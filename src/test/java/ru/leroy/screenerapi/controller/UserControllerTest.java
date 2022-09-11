@@ -78,17 +78,17 @@ class UserControllerTest {
     @Test
     void  registrationEmailExist() throws Exception {
         given(this.service.registration(this.userEntity))
-                .willThrow(EmailExistException.class);
+            .willThrow(EmailExistException.class);
         final MockHttpServletResponse response = this.mvc.perform(
-                        post("/user/registration")
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(this.userJson.write(this.userEntity).getJson())
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andReturn()
-                .getResponse();
+            post("/user/registration")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
         assertThat(response.getStatus())
-                .isEqualTo(HttpStatus.CONFLICT.value());
+            .isEqualTo(HttpStatus.CONFLICT.value());
     }
 
     @Test
@@ -96,15 +96,15 @@ class UserControllerTest {
         given(this.service.registration(this.userEntity))
                 .willThrow(IllegalStateException.class);
         final MockHttpServletResponse response = this.mvc.perform(
-                        post("/user/registration")
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(this.userJson.write(this.userEntity).getJson())
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andReturn()
-                .getResponse();
+            post("/user/registration")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
         assertThat(response.getStatus())
-                .isEqualTo(HttpStatus.BAD_REQUEST.value());
+            .isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
@@ -112,17 +112,17 @@ class UserControllerTest {
         given(this.service.authentication(this.userEntity))
                 .willReturn(this.userEntity);
         final MockHttpServletResponse response = this.mvc.perform(
-                        post("/user/authentication")
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(this.userJson.write(this.userEntity).getJson())
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andReturn()
-                .getResponse();
+            post("/user/authentication")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
         assertThat(response.getStatus())
-                .isEqualTo(HttpStatus.OK.value());
+            .isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .isEqualTo(this.userJson.write(this.userEntity).getJson());
+            .isEqualTo(this.userJson.write(this.userEntity).getJson());
     }
 
     @Test
@@ -130,15 +130,15 @@ class UserControllerTest {
         given(this.service.authentication(this.userEntity))
                 .willThrow(AuthenticationException.class);
         final MockHttpServletResponse response = this.mvc.perform(
-                        post("/user/authentication")
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(this.userJson.write(this.userEntity).getJson())
-                                .contentType(MediaType.APPLICATION_JSON)
+            post("/user/authentication")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andReturn()
                 .getResponse();
         assertThat(response.getStatus())
-                .isEqualTo(HttpStatus.UNAUTHORIZED.value());
+            .isEqualTo(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Test
@@ -146,30 +146,30 @@ class UserControllerTest {
         given(this.service.authentication(this.userEntity))
                 .willThrow(EmailNotFoundException.class);
         final MockHttpServletResponse response = this.mvc.perform(
-                        post("/user/authentication")
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(this.userJson.write(this.userEntity).getJson())
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andReturn()
-                .getResponse();
+            post("/user/authentication")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
         assertThat(response.getStatus())
-                .isEqualTo(HttpStatus.NOT_FOUND.value());
+            .isEqualTo(HttpStatus.NOT_FOUND.value());
     }
 
     @Test
     void authenticationFailWithException() throws Exception {
         given(this.service.authentication(this.userEntity))
-                .willThrow(IllegalStateException.class);
+            .willThrow(IllegalStateException.class);
         final MockHttpServletResponse response = this.mvc.perform(
-                        post("/user/authentication")
-                                .content(this.userJson.write(this.userEntity).getJson())
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andReturn()
-                .getResponse();
+            post("/user/authentication")
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
         assertThat(response.getStatus())
-                .isEqualTo(HttpStatus.BAD_REQUEST.value());
+            .isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
