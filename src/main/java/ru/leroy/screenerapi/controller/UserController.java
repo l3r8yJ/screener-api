@@ -48,9 +48,7 @@ public class UserController {
         .status(HttpStatus.CONFLICT)
         .body(ex.getMessage());
     } catch (final Exception ex) {
-      return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ResponseMessages.UNEXPECTED_ERROR);
+      return badRequestResponse();
     }
   }
 
@@ -68,17 +66,13 @@ public class UserController {
         .status(HttpStatus.OK)
         .body(auth);
     } catch (final EmailNotFoundException ex) {
-      return ResponseEntity
-        .status(HttpStatus.NOT_FOUND)
-        .body(ex.getMessage());
+      return notFoundResponse(ex);
     } catch (final AuthenticationException ex) {
       return ResponseEntity
         .status(HttpStatus.UNAUTHORIZED)
         .body(ex.getMessage());
     } catch (final Exception ex) {
-      return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ResponseMessages.UNEXPECTED_ERROR);
+      return badRequestResponse();
     }
   }
 
@@ -89,7 +83,7 @@ public class UserController {
    * @param user user with new password
    * @return updated user
   */
-  @PutMapping("/change-password/{id}")
+  @PutMapping("/password/change/{id}")
   public ResponseEntity<?> updatePasswordById(
       @Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
     try {
@@ -98,13 +92,9 @@ public class UserController {
         .status(HttpStatus.ACCEPTED)
         .body(ResponseMessages.PASSWORD_UPDATED);
     } catch (final UserNotFoundException ex) {
-      return ResponseEntity
-        .status(HttpStatus.NOT_FOUND)
-        .body(ex.getMessage());
+      return notFoundResponse(ex);
     } catch (final Exception ex) {
-      return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ResponseMessages.UNEXPECTED_ERROR);
+      return badRequestResponse();
     }
   }
 
@@ -115,7 +105,7 @@ public class UserController {
    * @param user user with new rate
    * @return updated user
   */
-  @PutMapping("/change-rate/{id}")
+  @PutMapping("/rate/change/{id}")
   public ResponseEntity<?> updateRateById(
       @Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
     try {
@@ -124,13 +114,9 @@ public class UserController {
         .status(HttpStatus.ACCEPTED)
         .body(ResponseMessages.RATE_UPDATED);
     } catch (final UserNotFoundException ex) {
-      return ResponseEntity
-        .status(HttpStatus.NOT_FOUND)
-        .body(ex.getMessage());
+      return notFoundResponse(ex);
     } catch (final Exception ex) {
-      return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ResponseMessages.UNEXPECTED_ERROR);
+      return badRequestResponse();
     }
   }
 
@@ -148,13 +134,21 @@ public class UserController {
         .status(HttpStatus.ACCEPTED)
         .body(user);
     } catch (final UserNotFoundException ex) {
-      return ResponseEntity
+      return notFoundResponse(ex);
+    } catch (final Exception ex) {
+      return badRequestResponse();
+    }
+  }
+
+  private static ResponseEntity<String> notFoundResponse(final Exception ex) {
+    return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
         .body(ex.getMessage());
-    } catch (final Exception ex) {
-      return ResponseEntity
+  }
+
+  private static ResponseEntity<String> badRequestResponse() {
+    return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
         .body(ResponseMessages.UNEXPECTED_ERROR);
-    }
   }
 }
