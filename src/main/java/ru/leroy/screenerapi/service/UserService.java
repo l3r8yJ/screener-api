@@ -6,7 +6,8 @@ import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
-import ru.leroy.screenerapi.exception.PasswordNotFoundException;
+import ru.leroy.screenerapi.exception.InvalidPasswordException;
+import ru.leroy.screenerapi.exception.PasswordNotExistException;
 import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.SameRateException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
@@ -57,18 +58,19 @@ public class UserService {
    * @param user as json with by email and password
    * @return new user
    * @throws EmailExistException when entered email exist
-   * @throws PasswordNotFoundException when password not found
+   * @throws PasswordNotExistException when password not exist
+   * @throws InvalidPasswordException when password is not valid
   */
   public UserEntity registration(final UserEntity user) throws EmailExistException {
     user.setRate(RateNames.FREE_RATE);
     this.repository
         .findByEmail(user.getEmail())
-        .ifPresent((usr) -> {
-          throw new EmailExistException(user.getEmail());
-        });
-    if (Objects.isNull(user.getPassword())) {
-      throw new PasswordNotFoundException();
-    }
+        .ifPresentOrElse(
+            (usr) -> {
+              throw new EmailExistException(user.getEmail());
+            },
+            () -> this.passwordValidation(user.getPassword())
+        );
     return this.repository.save(user);
   }
 
@@ -113,5 +115,20 @@ public class UserService {
     return this.repository
         .findById(id)
         .orElseThrow(UserNotFoundException::new);
+  }
+
+  private void passwordValidation(final String password)
+      throws InvalidPasswordException, PasswordNotExistException {
+    /*
+      At least 1 number, 1 lowercase letter, 1 uppercase letter; no spaces in the entire string;
+      at least 8 characters, no more than 40 characters.
+    */
+    final String passwordPattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,40}";
+    if (Objects.isNull(password)) {
+      throw new PasswordNotExistException();
+    }
+    if (!password.matches(passwordPattern)) {
+      throw new InvalidPasswordException();
+    }
   }
 }
