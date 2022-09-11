@@ -75,7 +75,7 @@ class UserControllerTest {
     }
 
     @Test
-    void authentication_success() throws Exception {
+    void authenticationSuccess() throws Exception {
         given(this.service.authentication(this.userEntity))
                 .willReturn(this.userEntity);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -93,7 +93,7 @@ class UserControllerTest {
     }
 
     @Test
-    void authentication_fail() throws Exception {
+    void authenticationFail() throws Exception {
         given(this.service.authentication(this.userEntity))
                 .willThrow(AuthenticationException.class);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -109,7 +109,7 @@ class UserControllerTest {
     }
 
     @Test
-    void authentication_emailNotFound() throws Exception {
+    void authenticationEmailNotFound() throws Exception {
         given(this.service.authentication(this.userEntity))
                 .willThrow(EmailNotFoundException.class);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -125,7 +125,7 @@ class UserControllerTest {
     }
 
     @Test
-    void authentication_badRequest() throws Exception {
+    void authenticationBadRequest() throws Exception {
         given(this.service.authentication(this.userEntity))
                 .willThrow(IllegalStateException.class);
         final MockHttpServletResponse response = this.mvc.perform(
