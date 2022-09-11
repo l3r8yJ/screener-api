@@ -18,9 +18,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.leroy.screenerapi.entity.UserEntity;
+import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.service.UserService;
 import ru.leroy.screenerapi.util.UsersUtil;
+
+import javax.print.attribute.standard.Media;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -71,6 +74,38 @@ class UserControllerTest {
         assertThat(response.getContentAsString()).isEqualTo(
             this.userJson.write(this.userEntity).getJson()
         );
+    }
+
+    @Test
+    void  registration_emailExist() throws Exception {
+        given(this.service.registration(this.userEntity))
+                .willThrow(EmailExistException.class);
+        final MockHttpServletResponse response = this.mvc.perform(
+             post("/user/registration")
+                   .accept(MediaType.APPLICATION_JSON)
+                   .content(this.userJson.write(this.userEntity).getJson())
+                   .contentType(MediaType.APPLICATION_JSON)
+             )
+            .andReturn()
+            .getResponse();
+        assertThat(response.getStatus())
+            .isEqualTo(HttpStatus.CONFLICT.value());
+    };
+
+    @Test
+    void registration_badRequest() throws Exception {
+        given(this.service.registration(this.userEntity))
+                .willThrow(IllegalStateException.class);
+        final MockHttpServletResponse response = this.mvc.perform(
+             post("/user/registration")
+                     .accept(MediaType.APPLICATION_JSON)
+                     .content(this.userJson.write(this.userEntity).getJson())
+                     .contentType(MediaType.APPLICATION_JSON)
+             )
+             .andReturn()
+             .getResponse();
+        assertThat(response.getStatus())
+                .isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
