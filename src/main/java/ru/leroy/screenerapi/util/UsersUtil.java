@@ -21,8 +21,8 @@ public class UsersUtil {
     return RandomString.make().concat("@gmail.com");
   }
 
-  public static String randomPassword() {
-    return RandomString.make().concat("-pass-from-test");
+  public static String password() {
+    return "fjFSDFD21312kjdfsj12jksd";
   }
 
   /**
@@ -49,7 +49,7 @@ public class UsersUtil {
     this.usr.setId(UsersUtil.randomId());
     this.usr.setRate(UsersUtil.randomRate());
     this.usr.setEmail(UsersUtil.randomEmail());
-    this.usr.setPassword(UsersUtil.randomPassword());
+    this.usr.setPassword(UsersUtil.password());
     this.usr.setExpiration(Instant.now());
     return this.usr;
   }
