@@ -18,14 +18,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.leroy.screenerapi.entity.UserEntity;
-import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.AuthenticationException;
+import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.service.UserService;
 import ru.leroy.screenerapi.util.UsersUtil;
-
-import javax.print.attribute.standard.Media;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -77,6 +75,39 @@ class UserControllerTest {
         );
     }
 
+    @Test
+    void  registrationEmailExist() throws Exception {
+        given(this.service.registration(this.userEntity))
+                .willThrow(EmailExistException.class);
+        final MockHttpServletResponse response = this.mvc.perform(
+                        post("/user/registration")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .content(this.userJson.write(this.userEntity).getJson())
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andReturn()
+                .getResponse();
+        assertThat(response.getStatus())
+                .isEqualTo(HttpStatus.CONFLICT.value());
+    }
+
+    @Test
+    void registrationBadRequest() throws Exception {
+        given(this.service.registration(this.userEntity))
+                .willThrow(IllegalStateException.class);
+        final MockHttpServletResponse response = this.mvc.perform(
+                        post("/user/registration")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .content(this.userJson.write(this.userEntity).getJson())
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andReturn()
+                .getResponse();
+        assertThat(response.getStatus())
+                .isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
     void authenticationSuccess() throws Exception {
         given(this.service.authentication(this.userEntity))
                 .willReturn(this.userEntity);
@@ -141,6 +172,7 @@ class UserControllerTest {
                 .isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
+    @Test
     void infoSuccess() throws Exception {
         given(this.service.userById(this.userEntity.getId()))
             .willReturn(this.userEntity);
