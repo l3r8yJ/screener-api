@@ -62,7 +62,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/change-password/{id}")
+    @PutMapping("/password/change/{id}")
     public ResponseEntity<?> updatePasswordById(@Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
         try {
             this.service.updateUserPasswordById(id, user.getPassword());
@@ -80,7 +80,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/change-rate/{id}")
+    @PutMapping("/rate/change/{id}")
     public ResponseEntity<?> updateRateById(@Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
         try {
             this.service.updateRateById(id, user.getRate());

@@ -224,7 +224,7 @@ class UserControllerTest {
         given(this.service.updateRateById(this.userEntity.getId(), "pro"))
             .willReturn(this.userEntity);
         final MockHttpServletResponse response = this.mvc.perform(
-            put("/user/change-rate/".concat(String.valueOf(this.userEntity.getId())))
+            put("/user/rate/change/".concat(String.valueOf(this.userEntity.getId())))
                 .content(this.userJson.write(this.userEntity).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
             )
@@ -240,7 +240,7 @@ class UserControllerTest {
         given(this.service.updateRateById(this.userEntity.getId(), "pro"))
             .willThrow(UserNotFoundException.class);
         final MockHttpServletResponse response = this.mvc.perform(
-            put("/user/change-rate/".concat(String.valueOf(this.userEntity.getId())))
+            put("/user/rate/change/".concat(String.valueOf(this.userEntity.getId())))
                 .content(this.userJson.write(this.userEntity).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
             )
@@ -256,7 +256,7 @@ class UserControllerTest {
         given(this.service.updateRateById(this.userEntity.getId(), "pro"))
             .willThrow(IllegalStateException.class);
         final MockHttpServletResponse response = this.mvc.perform(
-            put("/user/change-rate/".concat(String.valueOf(this.userEntity.getId())))
+            put("/user/rate/change/".concat(String.valueOf(this.userEntity.getId())))
                 .content(this.userJson.write(this.userEntity).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
             )
