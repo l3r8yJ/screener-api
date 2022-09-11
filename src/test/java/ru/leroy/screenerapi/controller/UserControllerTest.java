@@ -186,7 +186,7 @@ class UserControllerTest {
     }
 
     @Test
-    void  changeRateByIdSuccess() throws Exception {
+    void changeRateByIdSuccess() throws Exception {
         this.userEntity.setRate("pro");
         given(this.service.updateRateById(this.userEntity.getId(), "pro"))
             .willReturn(this.userEntity);
