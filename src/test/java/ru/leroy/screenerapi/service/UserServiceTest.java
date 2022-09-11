@@ -59,7 +59,7 @@ class UserServiceTest {
   }
 
   @Test
-  void userRegistration_success() {
+  void userRegistrationSuccess() {
     this.underTest.registration(this.user);
     final ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
     verify(this.repository)
@@ -70,7 +70,7 @@ class UserServiceTest {
   }
 
   @Test
-  void userRegistration_failWithThrowEmailExistException() {
+  void userRegistrationFailWithThrowEmailExistException() {
     given(this.repository.findByEmail(this.user.getEmail()))
         .willReturn(Optional.of(this.user));
     assertThatThrownBy(() -> this.underTest.registration(this.user))
@@ -80,7 +80,7 @@ class UserServiceTest {
   }
 
   @Test
-  void userAuthentication_success() {
+  void userAuthenticationSuccess() {
     given(this.repository.findByEmail(this.user.getEmail()))
         .willReturn(Optional.of(this.user));
     assertThat(this.underTest.authentication(this.user))
@@ -91,7 +91,7 @@ class UserServiceTest {
   }
 
   @Test
-  void userAuthentication_throwAuthenticationException() {
+  void userAuthenticationThrowAuthenticationException() {
     given(this.repository.findByEmail(this.user.getEmail()))
         .willReturn(Optional.of(withNewPassword(this.user, "wrong password")));
     assertThatThrownBy(() -> this.underTest.authentication(this.user))
@@ -100,14 +100,14 @@ class UserServiceTest {
   }
 
   @Test
-  void userAuthentication_throwEmailNotFoundException() {
+  void userAuthenticationThrowEmailNotFoundException() {
     assertThatThrownBy(() -> this.underTest.authentication(this.user))
         .isInstanceOf(EmailNotFoundException.class)
         .hasMessageContaining(new EmailNotFoundException(this.user.getEmail()).getMessage());
   }
 
   @Test
-  void updatePasswordById_success() {
+  void updatePasswordByIdSuccess() {
     given(this.repository.findById(this.user.getId()))
         .willReturn(Optional.of(this.user));
     final UserEntity actual =
@@ -121,7 +121,7 @@ class UserServiceTest {
   }
 
   @Test
-  void updatePasswordById_failWithSamePasswordExceptionThrown() {
+  void updatePasswordByIdFailWithSamePasswordExceptionThrown() {
     given(this.repository.findById(this.user.getId())).willReturn(Optional.of(this.user));
     assertThatThrownBy(
         () -> this.underTest.updateUserPasswordById(this.user.getId(), this.user.getPassword())
@@ -132,7 +132,7 @@ class UserServiceTest {
   }
 
   @Test
-  void updateRateById_success() {
+  void updateRateByIdSuccess() {
     this.user.setRate("pro");
     given(this.repository.findById(this.user.getId()))
         .willReturn(Optional.of(this.user));
@@ -146,7 +146,7 @@ class UserServiceTest {
   }
 
   @Test
-  void updateRateById_failWithSameRateException() {
+  void updateRateByIdFailWithSameRateException() {
     given(this.repository.findById(this.user.getId()))
         .willReturn(Optional.of(this.user));
     this.user.setRate("free");
