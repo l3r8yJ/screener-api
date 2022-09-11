@@ -29,7 +29,7 @@ class UserRepositoryTest {
   }
 
   @Test
-  void shouldToGiveUserByMail_fail() {
+  void shouldToGiveUserByMailFail() {
     assertThrows(
         UserNotFoundException.class,
         () -> this.underTest.findByEmail("foo")
@@ -38,32 +38,32 @@ class UserRepositoryTest {
   }
 
   @Test
-  void shouldToGiveUserByMail_success() {
+  void shouldToGiveUserByMailSuccess() {
     assertThat(this.user.getEmail())
         .isEqualTo(this.underTest.findByEmail(this.user.getEmail())
             .orElseThrow(UserNotFoundException::new).getEmail());
   }
 
   @Test
-  void shouldFindUserById_fail() {
+  void shouldFindUserByIdFail() {
     assertThat(this.underTest.findById(new Random().nextLong()))
         .isNotPresent();
   }
 
   @Test
-  void shouldFindUserById_success() {
+  void shouldFindUserByIdSuccess() {
     final UserEntity exist = this.underTest.findByEmail(this.user.getEmail()).orElseThrow();
     assertThat(this.underTest.findById(exist.getId())).isPresent();
   }
 
   @Test
-  void shouldExistUserById_fail() {
+  void shouldExistUserByIdFail() {
     assertThat(this.underTest.existsById(new Random().nextLong()))
         .isFalse();
   }
 
   @Test
-  void shouldExistUserById_success() {
+  void shouldExistUserByIdSuccess() {
     final UserEntity exist = this.underTest.findByEmail(this.user.getEmail()).orElseThrow();
     assertThat(this.underTest.existsById(exist.getId()))
         .isTrue();
