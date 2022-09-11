@@ -57,7 +57,7 @@ class UserControllerTest {
     }
 
     @Test
-    void registration_success() throws Exception {
+    void registrationSuccess() throws Exception {
         given(this.service.registration(this.userEntity))
             .willReturn(this.userEntity);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -93,7 +93,7 @@ class UserControllerTest {
     }
 
     @Test
-    void authenticationFail() throws Exception {
+    void authenticationFailWithAuthenticationException() throws Exception {
         given(this.service.authentication(this.userEntity))
                 .willThrow(AuthenticationException.class);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -109,7 +109,7 @@ class UserControllerTest {
     }
 
     @Test
-    void authenticationEmailNotFound() throws Exception {
+    void authenticationFailWithEmailNotFoundException() throws Exception {
         given(this.service.authentication(this.userEntity))
                 .willThrow(EmailNotFoundException.class);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -125,7 +125,7 @@ class UserControllerTest {
     }
 
     @Test
-    void authenticationBadRequest() throws Exception {
+    void authenticationFailWithException() throws Exception {
         given(this.service.authentication(this.userEntity))
                 .willThrow(IllegalStateException.class);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -140,7 +140,7 @@ class UserControllerTest {
     }
 
     @Test
-    void info_success() throws Exception {
+    void infoSuccess() throws Exception {
         given(this.service.userById(this.userEntity.getId()))
             .willReturn(this.userEntity);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -156,7 +156,7 @@ class UserControllerTest {
     }
 
     @Test
-    void info_notFound() throws Exception {
+    void infoFailWithUserNotFoundException() throws Exception {
         given(this.service.userById(this.userEntity.getId()))
             .willThrow(UserNotFoundException.class);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -171,7 +171,7 @@ class UserControllerTest {
     }
 
     @Test
-    void info_badRequest() throws Exception {
+    void infoFailWithException() throws Exception {
         given(this.service.userById(this.userEntity.getId()))
             .willThrow(IllegalStateException.class);
         final MockHttpServletResponse response = this.mvc.perform(
@@ -186,7 +186,7 @@ class UserControllerTest {
     }
 
     @Test
-    void  changeRateById_success() throws Exception {
+    void changeRateByIdSuccess() throws Exception {
         this.userEntity.setRate("pro");
         given(this.service.updateRateById(this.userEntity.getId(), "pro"))
             .willReturn(this.userEntity);
@@ -202,7 +202,7 @@ class UserControllerTest {
     }
 
     @Test
-    void changeRateById_failWithUserNotFoundException() throws Exception {
+    void changeRateByIdFailWithUserNotFoundException() throws Exception {
         this.userEntity.setRate("pro");
         given(this.service.updateRateById(this.userEntity.getId(), "pro"))
             .willThrow(UserNotFoundException.class);
@@ -218,7 +218,7 @@ class UserControllerTest {
     }
 
     @Test
-    void changeRateById_failWithException() throws Exception {
+    void changeRateByIdFailWithException() throws Exception {
         this.userEntity.setRate("pro");
         given(this.service.updateRateById(this.userEntity.getId(), "pro"))
             .willThrow(IllegalStateException.class);
