@@ -71,3 +71,6 @@
 >
 > Run `mvn clean install` before sending a pull request to avoid confusing situations.
 >
+
+> # Docker image
+> [Link to DockerHub.](https://hub.docker.com/repository/docker/l3r8y/screener_api_image)
