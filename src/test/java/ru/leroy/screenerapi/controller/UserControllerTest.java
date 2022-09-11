@@ -24,8 +24,7 @@ import ru.leroy.screenerapi.util.UsersUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -112,6 +111,54 @@ class UserControllerTest {
                 get("/user/info/".concat(String.valueOf(this.userEntity.getId())))
                     .content(this.userJson.write(this.userEntity).getJson())
                     .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
+        assertThat(response.getStatus())
+            .isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    void  changeRateById_success() throws Exception {
+        this.userEntity.setRate("pro");
+        given(this.service.updateRateById(this.userEntity.getId(), "pro"))
+            .willReturn(this.userEntity);
+        final MockHttpServletResponse response = this.mvc.perform(
+            put("/user/change-rate/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
+        assertThat(response.getStatus())
+            .isEqualTo(HttpStatus.ACCEPTED.value());
+    }
+
+    @Test
+    void changeRateById_failWithUserNotFoundException() throws Exception {
+        this.userEntity.setRate("pro");
+        given(this.service.updateRateById(this.userEntity.getId(), "pro"))
+            .willThrow(UserNotFoundException.class);
+        final MockHttpServletResponse response = this.mvc.perform(
+            put("/user/change-rate/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn()
+            .getResponse();
+        assertThat(response.getStatus())
+            .isEqualTo(HttpStatus.NOT_FOUND.value());
+    }
+
+    @Test
+    void changeRateById_failWithException() throws Exception {
+        this.userEntity.setRate("pro");
+        given(this.service.updateRateById(this.userEntity.getId(), "pro"))
+            .willThrow(IllegalStateException.class);
+        final MockHttpServletResponse response = this.mvc.perform(
+            put("/user/change-rate/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
             )
             .andReturn()
             .getResponse();
