@@ -1,6 +1,7 @@
 package ru.leroy.screenerapi.controller;
 
 import javax.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.leroy.screenerapi.dto.UserRegistrationDto;
+import ru.leroy.screenerapi.dto.UserRegistrationResponseDto;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
@@ -26,6 +29,8 @@ import ru.leroy.screenerapi.service.UserService;
 public class UserController {
   private final UserService service;
 
+  private final ModelMapper modelMapper = new ModelMapper();
+
   public UserController(final UserService service) {
     this.service = service;
   }
@@ -33,16 +38,19 @@ public class UserController {
   /**
    * Registration method.
    *
-   * @param user Json with user data.
+   * @param request Json with user data.
    * @return response with user field
   */
   @PostMapping("/registration")
-  public ResponseEntity<?> registration(@Valid @RequestBody final UserEntity user) {
+  public ResponseEntity<?> registration(@RequestBody final UserRegistrationDto request) {
+    final UserEntity entity = this.modelMapper.map(request, UserEntity.class);
     try {
-      final UserEntity registered = this.service.registration(user);
+      final UserEntity registered = this.service.registration(entity);
+      final UserRegistrationResponseDto response =
+          this.modelMapper.map(registered, UserRegistrationResponseDto.class);
       return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(registered);
+        .body(response);
     } catch (final EmailExistException ex) {
       return ResponseEntity
         .status(HttpStatus.CONFLICT)

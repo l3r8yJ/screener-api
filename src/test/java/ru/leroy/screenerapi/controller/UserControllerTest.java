@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.leroy.screenerapi.dto.UserRegistrationDto;
+import ru.leroy.screenerapi.dto.UserRegistrationResponseDto;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
@@ -46,11 +49,21 @@ class UserControllerTest {
 
   private JacksonTester<UserEntity> userJson;
 
+  private JacksonTester<UserRegistrationResponseDto> regDtoJacksonTester;
+
   private UserEntity userEntity;
+
+  private UserRegistrationDto registrationDto;
+
+  private UserRegistrationResponseDto registrationResponseDto;
 
   @BeforeEach
   void setUp() {
     this.userEntity = new UsersUtil().buildRandomUser();
+    this.registrationDto =
+        new ModelMapper().map(this.userEntity, UserRegistrationDto.class);
+    this.registrationResponseDto =
+        new ModelMapper().map(this.userEntity, UserRegistrationResponseDto.class);
     final ObjectMapper mapper = JsonMapper.builder()
         .addModule(new JavaTimeModule())
         .build();
@@ -66,7 +79,7 @@ class UserControllerTest {
     final MockHttpServletResponse response = this.mvc.perform(
             post("/user/registration")
                 .accept(MediaType.APPLICATION_JSON)
-                .content(this.userJson.write(this.userEntity).getJson())
+                .content(this.regDtoJacksonTester.write(this.registrationResponseDto).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
         )
         .andReturn()
