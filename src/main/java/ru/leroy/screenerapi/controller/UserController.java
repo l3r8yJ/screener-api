@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.leroy.screenerapi.dto.user.UserResponseDto;
 import ru.leroy.screenerapi.dto.user.registration.UserRequestRegistration;
-import ru.leroy.screenerapi.dto.user.registration.UserResponseRegistration;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
@@ -46,8 +46,8 @@ public class UserController {
     final UserEntity entity = this.modelMapper.map(request, UserEntity.class);
     try {
       final UserEntity registered = this.service.registration(entity);
-      final UserResponseRegistration userResponseRegistration =
-          this.modelMapper.map(registered, UserResponseRegistration.class);
+      final UserResponseDto userResponseRegistration =
+          this.modelMapper.map(registered, UserResponseDto.class);
       return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(userResponseRegistration);

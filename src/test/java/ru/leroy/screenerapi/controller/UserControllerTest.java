@@ -24,8 +24,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.leroy.screenerapi.dto.user.UserResponseDto;
 import ru.leroy.screenerapi.dto.user.registration.UserRequestRegistration;
-import ru.leroy.screenerapi.dto.user.registration.UserResponseRegistration;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
@@ -49,13 +49,13 @@ class UserControllerTest {
 
   private JacksonTester<UserEntity> userJson;
 
-  private JacksonTester<UserResponseRegistration> regDtoJacksonTester;
+  private JacksonTester<UserResponseDto> regDtoJacksonTester;
 
   private UserEntity userEntity;
 
   private UserRequestRegistration requestRegistration;
 
-  private UserResponseRegistration responseRegistration;
+  private UserResponseDto responseRegistration;
 
   @BeforeEach
   void setUp() {
@@ -284,6 +284,6 @@ class UserControllerTest {
     this.userEntity = new ModelMapper()
         .map(this.requestRegistration, UserEntity.class);
     this.responseRegistration = new ModelMapper()
-        .map(this.userEntity, UserResponseRegistration.class);
+        .map(this.userEntity, UserResponseDto.class);
   }
 }

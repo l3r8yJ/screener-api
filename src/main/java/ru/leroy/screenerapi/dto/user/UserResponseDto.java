@@ -1,4 +1,4 @@
-package ru.leroy.screenerapi.dto.user.info;
+package ru.leroy.screenerapi.dto.user;
 
 import java.time.Instant;
 import javax.persistence.Id;
@@ -7,11 +7,10 @@ import javax.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
-* Full info DTO.
-*/
+ * The type User registration response dto.
+ */
 @Data
 public class UserResponseDto {
-
   @Id
   private Long id;
 
