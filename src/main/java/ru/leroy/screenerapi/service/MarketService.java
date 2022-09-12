@@ -6,7 +6,6 @@ import ru.leroy.screenerapi.repository.MarketRepository;
 /**
  * MarketService with business-logic.
  */
-
 @Service
 public class MarketService {
   private final MarketRepository repository;
