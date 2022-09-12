@@ -21,6 +21,7 @@ import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
+import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.message.ResponseMessages;
 import ru.leroy.screenerapi.service.UserService;
@@ -130,8 +131,12 @@ public class UserController {
     try {
       this.service.updateUserPasswordById(id, user.getPassword());
       return ResponseEntity
-        .status(HttpStatus.ACCEPTED)
-        .body(ResponseMessages.PASSWORD_UPDATED);
+          .status(HttpStatus.ACCEPTED)
+          .body(ResponseMessages.PASSWORD_UPDATED);
+    } catch (final SamePasswordException ex) {
+      return ResponseEntity
+          .status(HttpStatus.CONFLICT)
+          .body(ex.getMessage());
     } catch (final UserNotFoundException ex) {
       return notFoundResponse(ex);
     } catch (final Exception ex) {

@@ -30,6 +30,7 @@ import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
+import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.service.UserService;
 import ru.leroy.screenerapi.util.UsersUtil;
@@ -277,7 +278,71 @@ class UserControllerTest {
     assertThat(response.getStatus())
         .isEqualTo(HttpStatus.BAD_REQUEST.value());
   }
+        
+  @Test
+  void updatePasswordByIdSuccess() throws Exception {
+    this.userEntity.setPassword("Password1");
+    given(this.service.updateUserPasswordById(this.userEntity.getId(), "Password1"))
+        .willReturn(this.userEntity);
+    final MockHttpServletResponse response = this.mvc.perform(
+        put("/user/password/change/".concat(String.valueOf(this.userEntity.getId())))
+            .content(this.userJson.write(this.userEntity).getJson())
+            .contentType(MediaType.APPLICATION_JSON)
+    )
+        .andReturn()
+        .getResponse();
+    assertThat(response.getStatus())
+        .isEqualTo(HttpStatus.ACCEPTED.value());
+  }
 
+  @Test
+  void updatePasswordByIdFailWithSamePasswordException() throws Exception {
+    this.userEntity.setPassword("Password1");
+    given(this.service.updateUserPasswordById(this.userEntity.getId(), "Password1"))
+        .willThrow(SamePasswordException.class);
+    final MockHttpServletResponse response = this.mvc.perform(
+            put("/user/password/change/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andReturn()
+        .getResponse();
+    assertThat(response.getStatus())
+        .isEqualTo(HttpStatus.CONFLICT.value());
+  }
+
+  @Test
+  void updatePasswordByIdFailWithUserNotFoundException() throws Exception {
+    this.userEntity.setPassword("Password1");
+    given(this.service.updateUserPasswordById(this.userEntity.getId(), "Password1"))
+        .willThrow(UserNotFoundException.class);
+    final MockHttpServletResponse response = this.mvc.perform(
+            put("/user/password/change/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andReturn()
+        .getResponse();
+    assertThat(response.getStatus())
+        .isEqualTo(HttpStatus.NOT_FOUND.value());
+  }
+
+  @Test
+  void updatePasswordByIdFailWithException() throws Exception {
+    this.userEntity.setPassword("Password1");
+    given(this.service.updateUserPasswordById(this.userEntity.getId(), "Password1"))
+        .willThrow(IllegalStateException.class);
+    final MockHttpServletResponse response = this.mvc.perform(
+            put("/user/password/change/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andReturn()
+        .getResponse();
+    assertThat(response.getStatus())
+        .isEqualTo(HttpStatus.BAD_REQUEST.value());
+  }
+  
   private void prepareRegistrationDto() {
     this.requestRegistration = new ModelMapper()
         .map(this.userEntity, UserRequestRegistration.class);
