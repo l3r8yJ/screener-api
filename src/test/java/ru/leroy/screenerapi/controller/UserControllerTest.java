@@ -24,8 +24,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.leroy.screenerapi.dto.UserRegistrationDto;
-import ru.leroy.screenerapi.dto.UserRegistrationResponseDto;
+import ru.leroy.screenerapi.dto.user.registration.UserRequestRegistration;
+import ru.leroy.screenerapi.dto.user.registration.UserResponseRegistration;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
@@ -49,21 +49,17 @@ class UserControllerTest {
 
   private JacksonTester<UserEntity> userJson;
 
-  private JacksonTester<UserRegistrationResponseDto> regDtoJacksonTester;
+  private JacksonTester<UserResponseRegistration> regDtoJacksonTester;
 
   private UserEntity userEntity;
 
-  private UserRegistrationDto registrationDto;
+  private UserRequestRegistration requestRegistration;
 
-  private UserRegistrationResponseDto registrationResponseDto;
+  private UserResponseRegistration responseRegistration;
 
   @BeforeEach
   void setUp() {
     this.userEntity = new UsersUtil().buildRandomUser();
-    this.registrationDto =
-        new ModelMapper().map(this.userEntity, UserRegistrationDto.class);
-    this.registrationResponseDto =
-        new ModelMapper().map(this.userEntity, UserRegistrationResponseDto.class);
     final ObjectMapper mapper = JsonMapper.builder()
         .addModule(new JavaTimeModule())
         .build();
@@ -74,12 +70,13 @@ class UserControllerTest {
 
   @Test
   void registrationSuccess() throws Exception {
+    this.prepareRegistrationDto();
     given(this.service.registration(this.userEntity))
         .willReturn(this.userEntity);
     final MockHttpServletResponse response = this.mvc.perform(
             post("/user/registration")
                 .accept(MediaType.APPLICATION_JSON)
-                .content(this.regDtoJacksonTester.write(this.registrationResponseDto).getJson())
+                .content(this.regDtoJacksonTester.write(this.responseRegistration).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
         )
         .andReturn()
@@ -279,5 +276,14 @@ class UserControllerTest {
         .getResponse();
     assertThat(response.getStatus())
         .isEqualTo(HttpStatus.BAD_REQUEST.value());
+  }
+
+  private void prepareRegistrationDto() {
+    this.requestRegistration = new ModelMapper()
+        .map(this.userEntity, UserRequestRegistration.class);
+    this.userEntity = new ModelMapper()
+        .map(this.requestRegistration, UserEntity.class);
+    this.responseRegistration = new ModelMapper()
+        .map(this.userEntity, UserResponseRegistration.class);
   }
 }

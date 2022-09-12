@@ -11,7 +11,6 @@ import ru.leroy.screenerapi.exception.PasswordNotExistException;
 import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.SameRateException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
-import ru.leroy.screenerapi.message.RateNames;
 import ru.leroy.screenerapi.repository.UserRepository;
 
 /**
@@ -62,7 +61,6 @@ public class UserService {
    * @throws InvalidPasswordException when password is not valid
   */
   public UserEntity registration(final UserEntity user) throws EmailExistException {
-    user.setRate(RateNames.FREE_RATE);
     this.repository
         .findByEmail(user.getEmail())
         .ifPresentOrElse(

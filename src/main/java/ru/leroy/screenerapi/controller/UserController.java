@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.leroy.screenerapi.dto.UserRegistrationDto;
-import ru.leroy.screenerapi.dto.UserRegistrationResponseDto;
+import ru.leroy.screenerapi.dto.user.registration.UserRequestRegistration;
+import ru.leroy.screenerapi.dto.user.registration.UserResponseRegistration;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
@@ -42,15 +42,15 @@ public class UserController {
    * @return response with user field
   */
   @PostMapping("/registration")
-  public ResponseEntity<?> registration(@RequestBody final UserRegistrationDto request) {
+  public ResponseEntity<?> registration(@RequestBody final UserRequestRegistration request) {
     final UserEntity entity = this.modelMapper.map(request, UserEntity.class);
     try {
       final UserEntity registered = this.service.registration(entity);
-      final UserRegistrationResponseDto response =
-          this.modelMapper.map(registered, UserRegistrationResponseDto.class);
+      final UserResponseRegistration userResponseRegistration =
+          this.modelMapper.map(registered, UserResponseRegistration.class);
       return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(response);
+        .body(userResponseRegistration);
     } catch (final EmailExistException ex) {
       return ResponseEntity
         .status(HttpStatus.CONFLICT)
