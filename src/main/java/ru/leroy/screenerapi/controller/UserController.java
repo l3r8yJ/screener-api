@@ -34,7 +34,7 @@ public class UserController {
   private final UserService service;
 
   private final Logger log =
-      LoggerFactory.getLogger(UserEntity.class);
+      LoggerFactory.getLogger(UserController.class);
 
   private final ModelMapper modelMapper = new ModelMapper();
 
