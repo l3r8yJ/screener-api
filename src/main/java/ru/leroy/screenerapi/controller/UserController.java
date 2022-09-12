@@ -46,11 +46,11 @@ public class UserController {
     final UserEntity entity = this.modelMapper.map(request, UserEntity.class);
     try {
       final UserEntity registered = this.service.registration(entity);
-      final UserResponseDto userResponseRegistration =
+      final UserResponseDto response =
           this.modelMapper.map(registered, UserResponseDto.class);
       return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(userResponseRegistration);
+        .body(response);
     } catch (final EmailExistException ex) {
       return ResponseEntity
         .status(HttpStatus.CONFLICT)
