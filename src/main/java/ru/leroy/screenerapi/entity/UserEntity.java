@@ -1,5 +1,6 @@
 package ru.leroy.screenerapi.entity;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -9,10 +10,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
+import org.springframework.data.annotation.CreatedDate;
 
 /**
  * The User entity.
@@ -23,21 +27,26 @@ import org.hibernate.Hibernate;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class UserEntity {
+@NoArgsConstructor
+public class UserEntity implements Serializable {
   @Id
+  @NonNull
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", nullable = false)
   private Long id;
 
+  @NonNull
   @Column(name = "user_email", nullable = false, length = 45)
   private String email;
 
+  @NonNull
   @Column(name = "user_password", nullable = false, length = 45)
   private String password;
 
   @Column(name = "rate", length = 45)
   private String rate;
 
+  @CreatedDate
   @Column(name = "expiration")
   private Instant expiration;
 
@@ -50,7 +59,7 @@ public class UserEntity {
       return false;
     }
     final UserEntity that = (UserEntity) obj;
-    return null != this.id && Objects.equals(this.id, that.id);
+    return Objects.equals(this.id, that.id);
   }
 
   @Override
