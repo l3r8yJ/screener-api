@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +32,9 @@ import ru.leroy.screenerapi.service.UserService;
 @RequestMapping("/user")
 public class UserController {
   private final UserService service;
+
+  private final Logger log =
+      LoggerFactory.getLogger(UserEntity.class);
 
   private final ModelMapper modelMapper = new ModelMapper();
 
@@ -61,6 +66,7 @@ public class UserController {
   public ResponseEntity<?> registration(@RequestBody final UserRequestRegistration request) {
     final UserEntity entity = this.modelMapper.map(request, UserEntity.class);
     try {
+      this.log.info("REST request to user registration");
       final UserEntity registered = this.service.registration(entity);
       final UserResponseDto response =
           this.modelMapper.map(registered, UserResponseDto.class);
@@ -68,12 +74,23 @@ public class UserController {
         .status(HttpStatus.CREATED)
         .body(response);
     } catch (final EmailExistException ex) {
+      this.logOnErrorRegistration(ex);
       return ResponseEntity
         .status(HttpStatus.CONFLICT)
         .body(ex.getMessage());
     } catch (final Exception ex) {
+      this.logOnErrorRegistration(ex);
       return badRequestResponse();
     }
+  }
+
+  private void logOnErrorRegistration(final Exception ex) {
+    this.log.error(
+        String.format(
+            "Error in user registration: %s",
+            ex.getMessage()
+        )
+    );
   }
 
   /**
