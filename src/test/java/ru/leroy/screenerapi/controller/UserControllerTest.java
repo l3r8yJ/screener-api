@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.leroy.screenerapi.dto.user.UserResponseDto;
+import ru.leroy.screenerapi.dto.user.registration.UserRequestRegistration;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
@@ -47,7 +50,13 @@ class UserControllerTest {
 
   private JacksonTester<UserEntity> userJson;
 
+  private JacksonTester<UserResponseDto> regDtoJacksonTester;
+
   private UserEntity userEntity;
+
+  private UserRequestRegistration requestRegistration;
+
+  private UserResponseDto responseRegistration;
 
   @BeforeEach
   void setUp() {
@@ -62,12 +71,13 @@ class UserControllerTest {
 
   @Test
   void registrationSuccess() throws Exception {
+    this.prepareRegistrationDto();
     given(this.service.registration(this.userEntity))
         .willReturn(this.userEntity);
     final MockHttpServletResponse response = this.mvc.perform(
             post("/user/registration")
                 .accept(MediaType.APPLICATION_JSON)
-                .content(this.userJson.write(this.userEntity).getJson())
+                .content(this.regDtoJacksonTester.write(this.responseRegistration).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
         )
         .andReturn()
@@ -268,7 +278,7 @@ class UserControllerTest {
     assertThat(response.getStatus())
         .isEqualTo(HttpStatus.BAD_REQUEST.value());
   }
-
+        
   @Test
   void updatePasswordByIdSuccess() throws Exception {
     this.userEntity.setPassword("Password1");
@@ -331,5 +341,14 @@ class UserControllerTest {
         .getResponse();
     assertThat(response.getStatus())
         .isEqualTo(HttpStatus.BAD_REQUEST.value());
+  }
+  
+  private void prepareRegistrationDto() {
+    this.requestRegistration = new ModelMapper()
+        .map(this.userEntity, UserRequestRegistration.class);
+    this.userEntity = new ModelMapper()
+        .map(this.requestRegistration, UserEntity.class);
+    this.responseRegistration = new ModelMapper()
+        .map(this.userEntity, UserResponseDto.class);
   }
 }
