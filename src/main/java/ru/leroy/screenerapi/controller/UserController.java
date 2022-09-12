@@ -1,5 +1,7 @@
 package ru.leroy.screenerapi.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,20 @@ public class UserController {
 
   public UserController(final UserService service) {
     this.service = service;
+  }
+
+  /**
+   * Response as json – all users.
+   *
+   * @return list of users
+  */
+  @GetMapping("/index")
+  public ResponseEntity<List<UserResponseDto>> index() {
+    return ResponseEntity
+      .ok(this.service.index()
+        .stream()
+        .map(entity -> this.modelMapper.map(entity, UserResponseDto.class))
+        .collect(Collectors.toList()));
   }
 
   /**

@@ -1,6 +1,8 @@
 package ru.leroy.screenerapi.service;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
@@ -24,8 +26,15 @@ public class UserService {
     this.repository = repository;
   }
 
-  public Iterable<UserEntity> index() {
-    return this.repository.findAll();
+  /**
+   * All users.
+   *
+   * @return list of all users
+  */
+  public List<UserEntity> index() {
+    return StreamSupport
+        .stream(this.repository.findAll().spliterator(), false)
+        .toList();
   }
 
   public UserEntity userById(final Long id) throws UserNotFoundException {
