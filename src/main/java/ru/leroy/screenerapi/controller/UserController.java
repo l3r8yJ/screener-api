@@ -21,6 +21,7 @@ import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
+import ru.leroy.screenerapi.exception.InvalidPasswordException;
 import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.message.ResponseMessages;
@@ -79,6 +80,11 @@ public class UserController {
       return ResponseEntity
         .status(HttpStatus.CONFLICT)
         .body(ex.getMessage());
+    } catch (final InvalidPasswordException ex) {
+      this.logOnErrorRegistration(ex);
+      return ResponseEntity
+          .status(HttpStatus.CONFLICT)
+          .body(ex);
     } catch (final Exception ex) {
       this.logOnErrorRegistration(ex);
       return badRequestResponse();
