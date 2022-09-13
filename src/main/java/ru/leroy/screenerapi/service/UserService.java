@@ -1,6 +1,8 @@
 package ru.leroy.screenerapi.service;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
@@ -11,7 +13,6 @@ import ru.leroy.screenerapi.exception.PasswordNotExistException;
 import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.SameRateException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
-import ru.leroy.screenerapi.message.RateNames;
 import ru.leroy.screenerapi.repository.UserRepository;
 
 /**
@@ -25,8 +26,15 @@ public class UserService {
     this.repository = repository;
   }
 
-  public Iterable<UserEntity> index() {
-    return this.repository.findAll();
+  /**
+   * All users.
+   *
+   * @return list of all users
+  */
+  public List<UserEntity> index() {
+    return StreamSupport
+        .stream(this.repository.findAll().spliterator(), false)
+        .toList();
   }
 
   public UserEntity userById(final Long id) throws UserNotFoundException {
@@ -62,7 +70,6 @@ public class UserService {
    * @throws InvalidPasswordException when password is not valid
   */
   public UserEntity registration(final UserEntity user) throws EmailExistException {
-    user.setRate(RateNames.FREE_RATE);
     this.repository
         .findByEmail(user.getEmail())
         .ifPresentOrElse(
@@ -109,7 +116,6 @@ public class UserService {
     updated.setRate(rate);
     return updated;
   }
-
 
   private UserEntity userBy(final Long id) throws UserNotFoundException {
     return this.repository

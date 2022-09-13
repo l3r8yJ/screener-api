@@ -1,6 +1,11 @@
 package ru.leroy.screenerapi.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +15,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.leroy.screenerapi.dto.user.UserResponseDto;
+import ru.leroy.screenerapi.dto.user.registration.UserRequestRegistration;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
+import ru.leroy.screenerapi.exception.InvalidPasswordException;
+import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.message.ResponseMessages;
 import ru.leroy.screenerapi.service.UserService;
@@ -26,32 +35,69 @@ import ru.leroy.screenerapi.service.UserService;
 public class UserController {
   private final UserService service;
 
+  private final Logger log =
+      LoggerFactory.getLogger(UserController.class);
+
+  private final ModelMapper modelMapper = new ModelMapper();
+
   public UserController(final UserService service) {
     this.service = service;
   }
 
   /**
+   * Response as json – all users.
+   *
+   * @return list of users
+  */
+  @GetMapping("/index")
+  public ResponseEntity<List<UserResponseDto>> index() {
+    return ResponseEntity
+      .ok(this.service.index()
+        .stream()
+        .map(entity -> this.modelMapper.map(entity, UserResponseDto.class))
+        .collect(Collectors.toList()));
+  }
+
+  /**
    * Registration method.
    *
-   * @param user Json with user data.
+   * @param request Json with user data.
    * @return response with user field
   */
   @PostMapping("/registration")
-  public ResponseEntity<?> registration(@Valid @RequestBody final UserEntity user) {
+  public ResponseEntity<?> registration(@RequestBody final UserRequestRegistration request) {
+    final UserEntity entity = this.modelMapper.map(request, UserEntity.class);
     try {
-      final UserEntity registered = this.service.registration(user);
+      this.log.info("REST request to user registration");
+      final UserEntity registered = this.service.registration(entity);
+      final UserResponseDto response =
+          this.modelMapper.map(registered, UserResponseDto.class);
       return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(registered);
+        .body(response);
     } catch (final EmailExistException ex) {
+      this.logOnErrorRegistration(ex);
       return ResponseEntity
         .status(HttpStatus.CONFLICT)
         .body(ex.getMessage());
-    } catch (final Exception ex) {
+    } catch (final InvalidPasswordException ex) {
+      this.logOnErrorRegistration(ex);
       return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ResponseMessages.UNEXPECTED_ERROR);
+          .status(HttpStatus.CONFLICT)
+          .body(ex);
+    } catch (final Exception ex) {
+      this.logOnErrorRegistration(ex);
+      return badRequestResponse();
     }
+  }
+
+  private void logOnErrorRegistration(final Exception ex) {
+    this.log.error(
+        String.format(
+            "Error in user registration: %s",
+            ex.getMessage()
+        )
+    );
   }
 
   /**
@@ -68,17 +114,13 @@ public class UserController {
         .status(HttpStatus.OK)
         .body(auth);
     } catch (final EmailNotFoundException ex) {
-      return ResponseEntity
-        .status(HttpStatus.NOT_FOUND)
-        .body(ex.getMessage());
+      return notFoundResponse(ex);
     } catch (final AuthenticationException ex) {
       return ResponseEntity
         .status(HttpStatus.UNAUTHORIZED)
         .body(ex.getMessage());
     } catch (final Exception ex) {
-      return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ResponseMessages.UNEXPECTED_ERROR);
+      return badRequestResponse();
     }
   }
 
@@ -89,22 +131,22 @@ public class UserController {
    * @param user user with new password
    * @return updated user
   */
-  @PutMapping("/change-password/{id}")
-  public ResponseEntity<?> updatePasswordById(
+  @PutMapping("/password/change/{id}")
+  public ResponseEntity<String> updatePasswordById(
       @Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
     try {
       this.service.updateUserPasswordById(id, user.getPassword());
       return ResponseEntity
-        .status(HttpStatus.ACCEPTED)
-        .body(ResponseMessages.PASSWORD_UPDATED);
+          .status(HttpStatus.ACCEPTED)
+          .body(ResponseMessages.PASSWORD_UPDATED);
+    } catch (final SamePasswordException ex) {
+      return ResponseEntity
+          .status(HttpStatus.CONFLICT)
+          .body(ex.getMessage());
     } catch (final UserNotFoundException ex) {
-      return ResponseEntity
-        .status(HttpStatus.NOT_FOUND)
-        .body(ex.getMessage());
+      return notFoundResponse(ex);
     } catch (final Exception ex) {
-      return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ResponseMessages.UNEXPECTED_ERROR);
+      return badRequestResponse();
     }
   }
 
@@ -115,8 +157,8 @@ public class UserController {
    * @param user user with new rate
    * @return updated user
   */
-  @PutMapping("/change-rate/{id}")
-  public ResponseEntity<?> updateRateById(
+  @PutMapping("/rate/change/{id}")
+  public ResponseEntity<String> updateRateById(
       @Valid @PathVariable final Long id, @RequestBody final UserEntity user) {
     try {
       this.service.updateRateById(id, user.getRate());
@@ -124,13 +166,9 @@ public class UserController {
         .status(HttpStatus.ACCEPTED)
         .body(ResponseMessages.RATE_UPDATED);
     } catch (final UserNotFoundException ex) {
-      return ResponseEntity
-        .status(HttpStatus.NOT_FOUND)
-        .body(ex.getMessage());
+      return notFoundResponse(ex);
     } catch (final Exception ex) {
-      return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ResponseMessages.UNEXPECTED_ERROR);
+      return badRequestResponse();
     }
   }
 
@@ -148,13 +186,21 @@ public class UserController {
         .status(HttpStatus.ACCEPTED)
         .body(user);
     } catch (final UserNotFoundException ex) {
-      return ResponseEntity
+      return notFoundResponse(ex);
+    } catch (final Exception ex) {
+      return badRequestResponse();
+    }
+  }
+
+  private static ResponseEntity<String> notFoundResponse(final Exception ex) {
+    return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
         .body(ex.getMessage());
-    } catch (final Exception ex) {
-      return ResponseEntity
+  }
+
+  private static ResponseEntity<String> badRequestResponse() {
+    return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
         .body(ResponseMessages.UNEXPECTED_ERROR);
-    }
   }
 }

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.HttpStatus;
@@ -23,10 +24,13 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.leroy.screenerapi.dto.user.UserResponseDto;
+import ru.leroy.screenerapi.dto.user.registration.UserRequestRegistration;
 import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
+import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.UserNotFoundException;
 import ru.leroy.screenerapi.service.UserService;
 import ru.leroy.screenerapi.util.UsersUtil;
@@ -46,7 +50,13 @@ class UserControllerTest {
 
   private JacksonTester<UserEntity> userJson;
 
+  private JacksonTester<UserResponseDto> regDtoJacksonTester;
+
   private UserEntity userEntity;
+
+  private UserRequestRegistration requestRegistration;
+
+  private UserResponseDto responseRegistration;
 
   @BeforeEach
   void setUp() {
@@ -61,12 +71,13 @@ class UserControllerTest {
 
   @Test
   void registrationSuccess() throws Exception {
+    this.prepareRegistrationDto();
     given(this.service.registration(this.userEntity))
         .willReturn(this.userEntity);
     final MockHttpServletResponse response = this.mvc.perform(
             post("/user/registration")
                 .accept(MediaType.APPLICATION_JSON)
-                .content(this.userJson.write(this.userEntity).getJson())
+                .content(this.regDtoJacksonTester.write(this.responseRegistration).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
         )
         .andReturn()
@@ -226,7 +237,7 @@ class UserControllerTest {
     given(this.service.updateRateById(this.userEntity.getId(), "pro"))
         .willReturn(this.userEntity);
     final MockHttpServletResponse response = this.mvc.perform(
-            put("/user/change-rate/".concat(String.valueOf(this.userEntity.getId())))
+            put("/user/rate/change/".concat(String.valueOf(this.userEntity.getId())))
                 .content(this.userJson.write(this.userEntity).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
         )
@@ -242,7 +253,7 @@ class UserControllerTest {
     given(this.service.updateRateById(this.userEntity.getId(), "pro"))
         .willThrow(UserNotFoundException.class);
     final MockHttpServletResponse response = this.mvc.perform(
-            put("/user/change-rate/".concat(String.valueOf(this.userEntity.getId())))
+            put("/user/rate/change/".concat(String.valueOf(this.userEntity.getId())))
                 .content(this.userJson.write(this.userEntity).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
         )
@@ -258,7 +269,7 @@ class UserControllerTest {
     given(this.service.updateRateById(this.userEntity.getId(), "pro"))
         .willThrow(IllegalStateException.class);
     final MockHttpServletResponse response = this.mvc.perform(
-            put("/user/change-rate/".concat(String.valueOf(this.userEntity.getId())))
+            put("/user/rate/change/".concat(String.valueOf(this.userEntity.getId())))
                 .content(this.userJson.write(this.userEntity).getJson())
                 .contentType(MediaType.APPLICATION_JSON)
         )
@@ -266,5 +277,78 @@ class UserControllerTest {
         .getResponse();
     assertThat(response.getStatus())
         .isEqualTo(HttpStatus.BAD_REQUEST.value());
+  }
+        
+  @Test
+  void updatePasswordByIdSuccess() throws Exception {
+    this.userEntity.setPassword("Password1");
+    given(this.service.updateUserPasswordById(this.userEntity.getId(), "Password1"))
+        .willReturn(this.userEntity);
+    final MockHttpServletResponse response = this.mvc.perform(
+        put("/user/password/change/".concat(String.valueOf(this.userEntity.getId())))
+            .content(this.userJson.write(this.userEntity).getJson())
+            .contentType(MediaType.APPLICATION_JSON)
+    )
+        .andReturn()
+        .getResponse();
+    assertThat(response.getStatus())
+        .isEqualTo(HttpStatus.ACCEPTED.value());
+  }
+
+  @Test
+  void updatePasswordByIdFailWithSamePasswordException() throws Exception {
+    this.userEntity.setPassword("Password1");
+    given(this.service.updateUserPasswordById(this.userEntity.getId(), "Password1"))
+        .willThrow(SamePasswordException.class);
+    final MockHttpServletResponse response = this.mvc.perform(
+            put("/user/password/change/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andReturn()
+        .getResponse();
+    assertThat(response.getStatus())
+        .isEqualTo(HttpStatus.CONFLICT.value());
+  }
+
+  @Test
+  void updatePasswordByIdFailWithUserNotFoundException() throws Exception {
+    this.userEntity.setPassword("Password1");
+    given(this.service.updateUserPasswordById(this.userEntity.getId(), "Password1"))
+        .willThrow(UserNotFoundException.class);
+    final MockHttpServletResponse response = this.mvc.perform(
+            put("/user/password/change/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andReturn()
+        .getResponse();
+    assertThat(response.getStatus())
+        .isEqualTo(HttpStatus.NOT_FOUND.value());
+  }
+
+  @Test
+  void updatePasswordByIdFailWithException() throws Exception {
+    this.userEntity.setPassword("Password1");
+    given(this.service.updateUserPasswordById(this.userEntity.getId(), "Password1"))
+        .willThrow(IllegalStateException.class);
+    final MockHttpServletResponse response = this.mvc.perform(
+            put("/user/password/change/".concat(String.valueOf(this.userEntity.getId())))
+                .content(this.userJson.write(this.userEntity).getJson())
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andReturn()
+        .getResponse();
+    assertThat(response.getStatus())
+        .isEqualTo(HttpStatus.BAD_REQUEST.value());
+  }
+  
+  private void prepareRegistrationDto() {
+    this.requestRegistration = new ModelMapper()
+        .map(this.userEntity, UserRequestRegistration.class);
+    this.userEntity = new ModelMapper()
+        .map(this.requestRegistration, UserEntity.class);
+    this.responseRegistration = new ModelMapper()
+        .map(this.userEntity, UserResponseDto.class);
   }
 }
