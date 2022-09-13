@@ -1,4 +1,4 @@
-package ru.leroy.screenerapi.exception;
+package ru.leroy.screenerapi.exception.user;
 
 /**
  * The type User not found exception.

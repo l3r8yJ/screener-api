@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import ru.leroy.screenerapi.entity.UserEntity;
-import ru.leroy.screenerapi.exception.UserNotFoundException;
+import ru.leroy.screenerapi.exception.user.UserNotFoundException;
 import ru.leroy.screenerapi.util.UsersUtil;
 
 @DataJpaTest

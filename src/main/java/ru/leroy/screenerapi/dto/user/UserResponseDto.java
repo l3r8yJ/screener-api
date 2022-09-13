@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
- * The type User registration response dto.
+ * The type User response dto.
  */
 @Data
 public class UserResponseDto {

@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.leroy.screenerapi.dto.user.UserResponseDto;
 import ru.leroy.screenerapi.dto.user.registration.UserRequestRegistration;
 import ru.leroy.screenerapi.entity.UserEntity;
-import ru.leroy.screenerapi.exception.AuthenticationException;
-import ru.leroy.screenerapi.exception.EmailExistException;
-import ru.leroy.screenerapi.exception.EmailNotFoundException;
-import ru.leroy.screenerapi.exception.SamePasswordException;
-import ru.leroy.screenerapi.exception.UserNotFoundException;
+import ru.leroy.screenerapi.exception.user.AuthenticationException;
+import ru.leroy.screenerapi.exception.user.EmailExistException;
+import ru.leroy.screenerapi.exception.user.EmailNotFoundException;
+import ru.leroy.screenerapi.exception.user.SamePasswordException;
+import ru.leroy.screenerapi.exception.user.UserNotFoundException;
 import ru.leroy.screenerapi.message.ResponseMessages;
 import ru.leroy.screenerapi.service.UserService;
 
