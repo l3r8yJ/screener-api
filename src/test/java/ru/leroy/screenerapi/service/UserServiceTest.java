@@ -20,6 +20,8 @@ import ru.leroy.screenerapi.entity.UserEntity;
 import ru.leroy.screenerapi.exception.AuthenticationException;
 import ru.leroy.screenerapi.exception.EmailExistException;
 import ru.leroy.screenerapi.exception.EmailNotFoundException;
+import ru.leroy.screenerapi.exception.InvalidPasswordException;
+import ru.leroy.screenerapi.exception.PasswordNotExistException;
 import ru.leroy.screenerapi.exception.SamePasswordException;
 import ru.leroy.screenerapi.exception.SameRateException;
 import ru.leroy.screenerapi.repository.UserRepository;
@@ -76,6 +78,24 @@ class UserServiceTest {
     assertThatThrownBy(() -> this.underTest.registration(this.user))
         .isInstanceOf(EmailExistException.class)
         .hasMessageContaining(new EmailExistException(this.user.getEmail()).getMessage());
+    verify(this.repository, never()).save(any());
+  }
+
+  @Test
+  void userRegistrationFailWithThrowPasswordNotExistException() {
+    final UserEntity expected = withNewPassword(this.user, "");
+    assertThatThrownBy(() -> this.underTest.registration(expected))
+        .isInstanceOf(PasswordNotExistException.class)
+        .hasMessageContaining(new PasswordNotExistException().getMessage());
+    verify(this.repository, never()).save(any());
+  }
+
+  @Test
+  void userRegistrationFailWithThrowInvalidPasswordException() {
+    final UserEntity expected = withNewPassword(this.user, "invalid password");
+    assertThatThrownBy(() -> this.underTest.registration(expected))
+        .isInstanceOf(InvalidPasswordException.class)
+        .hasMessageContaining(new InvalidPasswordException().getMessage());
     verify(this.repository, never()).save(any());
   }
 
