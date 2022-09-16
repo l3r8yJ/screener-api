@@ -130,7 +130,7 @@ public class UserService {
       at least 8 characters, no more than 40 characters.
     */
     final String passwordPattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,40}";
-    if (Objects.isNull(password)) {
+    if (password.isEmpty()) {
       throw new PasswordNotExistException();
     }
     if (!password.matches(passwordPattern)) {
