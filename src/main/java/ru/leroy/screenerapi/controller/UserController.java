@@ -75,16 +75,11 @@ public class UserController {
       return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(response);
-    } catch (final EmailExistException ex) {
+    } catch (final EmailExistException | InvalidPasswordException ex) {
       this.logOnErrorRegistration(ex);
       return ResponseEntity
         .status(HttpStatus.CONFLICT)
         .body(ex.getMessage());
-    } catch (final InvalidPasswordException ex) {
-      this.logOnErrorRegistration(ex);
-      return ResponseEntity
-          .status(HttpStatus.CONFLICT)
-          .body(ex);
     } catch (final Exception ex) {
       this.logOnErrorRegistration(ex);
       return badRequestResponse();
